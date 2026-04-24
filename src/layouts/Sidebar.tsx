@@ -1,4 +1,3 @@
-// src/layouts/AdminLayout/Sidebar.tsx
 import { useState } from 'react';
 import {
   Drawer,
@@ -8,8 +7,8 @@ import {
   ListItemText,
   Collapse,
   Box,
-  Typography,
 } from '@mui/material';
+import { GradientText } from '../components/GradientText';
 import type { SidebarItemProps } from '../types/Sidebar.types';
 
 // Import Icons
@@ -21,6 +20,16 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CategoryIcon from '@mui/icons-material/Category';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import EmergencyIcon from '@mui/icons-material/Emergency';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import AccessibleIcon from '@mui/icons-material/Accessible';
+import GamesIcon from '@mui/icons-material/Games';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
+import SummarizeIcon from '@mui/icons-material/Summarize';
+import { useSidebarHooks } from '../hooks/Sidebar';
 
 const drawerWidth = 280;
 
@@ -58,17 +67,72 @@ const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: Side
 };
 
 export default function Sidebar() {
-  const [openSystemMenu, setOpenSystemMenu] = useState(true);
+  const [openSystemMenu, setOpenSystemMenu] = useState(false);
+  const [openMedicalMenu, setOpenMedicalMenu] = useState(false);
+  const [openOperationMenu, setOpenOperationMenu] = useState(false);
+
+  const { tSidebar } = useSidebarHooks();
 
   const handleToggleSystemMenu = () => {
     setOpenSystemMenu(!openSystemMenu);
   };
 
+  const handleToggleMedicalMenu = () => {
+    setOpenMedicalMenu(!openMedicalMenu);
+  };
+
+  const handleToggleOperationMenu = () => {
+    setOpenOperationMenu(!openOperationMenu);
+  };
+
+  const medicalMenuItems = [
+    {
+      text: tSidebar('medicalManagement.specialtyManagement'),
+      icon: <CategoryIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('medicalManagement.clinicManagement'),
+      icon: <LocalHospitalIcon fontSize="small" />,
+    },
+    { text: tSidebar('medicalManagement.doctorList'), icon: <PeopleIcon fontSize="small" /> },
+    {
+      text: tSidebar('medicalManagement.serviceCatalog'),
+      icon: <HomeRepairServiceIcon fontSize="small" />,
+    },
+  ];
+
+  const operationMenuItems = [
+    {
+      text: tSidebar('operationManagement.appointmentManagement'),
+      icon: <CalendarMonthIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('operationManagement.workScheduleManagement'),
+      icon: <ScheduleIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('operationManagement.patientList'),
+      icon: <AccessibleIcon fontSize="small" />,
+    },
+  ];
+
   const systemMenuItems = [
-    { text: 'Quản lý chuyên khoa', icon: <CategoryIcon fontSize="small" /> },
-    { text: 'Quản lý cơ sở y tế', icon: <LocalHospitalIcon fontSize="small" /> },
-    { text: 'Danh sách bác sĩ', icon: <PeopleIcon fontSize="small" /> },
-    { text: 'Quản lý lịch hẹn', icon: <CalendarMonthIcon fontSize="small" /> },
+    {
+      text: tSidebar('systemAdministration.userManagement'),
+      icon: <GamesIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('systemAdministration.notificationManagement'),
+      icon: <NotificationsActiveIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('systemAdministration.configurationManagement'),
+      icon: <AppSettingsAltIcon fontSize="small" />,
+    },
+    {
+      text: tSidebar('systemAdministration.reportManagement'),
+      icon: <SummarizeIcon fontSize="small" />,
+    },
   ];
 
   return (
@@ -87,28 +151,57 @@ export default function Sidebar() {
       {/* 1. Khu vực Logo */}
       <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <img src="./assets/logo.png" alt="BookingHealth Logo" width={40} />
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 0.5 }}
-        >
+        <GradientText variant="h6" sx={{ letterSpacing: 0.5 }}>
           BookingHealth
-        </Typography>
+        </GradientText>
       </Box>
 
       {/* 2. Danh sách Menu */}
       <List sx={{ px: 2 }}>
         {/* Menu 1 */}
-        <NavItem icon={<DashboardIcon />} text="Dashboard" active />
+        <NavItem icon={<DashboardIcon />} text={tSidebar('title.dashboard')} active />
 
         {/* Menu 2 (Có Collapse) */}
+        {/* Quản lý y tế */}
+        <NavItem
+          icon={<EmergencyIcon />}
+          text={tSidebar('title.medicalManagement')}
+          onClick={handleToggleMedicalMenu}
+          rightElement={openMedicalMenu ? <ExpandLess /> : <ExpandMore />}
+        />
+
+        <Collapse in={openMedicalMenu} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {medicalMenuItems.map((item, index) => (
+              <NavItem key={index} isSubItem icon={item.icon} text={item.text} />
+            ))}
+          </List>
+        </Collapse>
+
+        {/* Quản lý vận hành */}
+        <NavItem
+          icon={<AccountTreeIcon />}
+          text={tSidebar('title.operationManagement')}
+          onClick={handleToggleOperationMenu}
+          rightElement={openOperationMenu ? <ExpandLess /> : <ExpandMore />}
+        />
+
+        <Collapse in={openOperationMenu} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {operationMenuItems.map((item, index) => (
+              <NavItem key={index} isSubItem icon={item.icon} text={item.text} />
+            ))}
+          </List>
+        </Collapse>
+
+        {/* Quản lý hệ thống */}
         <NavItem
           icon={<SettingsSuggestIcon />}
-          text="Quản trị hệ thống"
+          text={tSidebar('title.systemAdministration')}
           onClick={handleToggleSystemMenu}
           rightElement={openSystemMenu ? <ExpandLess /> : <ExpandMore />}
         />
 
-        {/* Danh sách con */}
         <Collapse in={openSystemMenu} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {systemMenuItems.map((item, index) => (
