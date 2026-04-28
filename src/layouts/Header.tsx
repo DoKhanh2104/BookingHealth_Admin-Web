@@ -10,9 +10,11 @@ import {
   Typography,
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SettingsIcon from '@mui/icons-material/Settings';
+import {
+  Search as SearchIcon,
+  Notifications as NotificationsIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
 
 const drawerWidth = 280;
 

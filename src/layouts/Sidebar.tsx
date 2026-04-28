@@ -12,23 +12,25 @@ import { GradientText } from '../components/GradientText';
 import type { SidebarItemProps } from '../types/Sidebar.types';
 
 // Import Icons
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import PeopleIcon from '@mui/icons-material/People';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CategoryIcon from '@mui/icons-material/Category';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import EmergencyIcon from '@mui/icons-material/Emergency';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import AccessibleIcon from '@mui/icons-material/Accessible';
-import GamesIcon from '@mui/icons-material/Games';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
-import SummarizeIcon from '@mui/icons-material/Summarize';
+import {
+  Dashboard as DashboardIcon,
+  SettingsSuggest as SettingsSuggestIcon,
+  LocalHospital as LocalHospitalIcon,
+  People as PeopleIcon,
+  CalendarMonth as CalendarMonthIcon,
+  Category as CategoryIcon,
+  ExpandLess,
+  ExpandMore,
+  MedicalServices as MedicalServicesIcon,
+  AccountTree as AccountTreeIcon,
+  HomeRepairService as HomeRepairServiceIcon,
+  Schedule as ScheduleIcon,
+  Accessible as AccessibleIcon,
+  Games as GamesIcon,
+  NotificationsActive as NotificationsActiveIcon,
+  AppSettingsAlt as AppSettingsAltIcon,
+  Summarize as SummarizeIcon,
+} from '@mui/icons-material';
 import { useSidebarHooks } from '../hooks/Sidebar';
 
 const drawerWidth = 280;
@@ -52,12 +54,10 @@ const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: Side
       <ListItemIcon sx={{ color: 'inherit', minWidth: 30 }}>{icon}</ListItemIcon>
       <ListItemText
         primary={text}
-        slotProps={{
-          primary: {
-            sx: {
-              fontWeight: active ? 600 : 500,
-              fontSize: 14,
-            },
+        primaryTypographyProps={{
+          sx: {
+            fontWeight: active ? 600 : 500,
+            fontSize: 14,
           },
         }}
       />
@@ -164,7 +164,7 @@ export default function Sidebar() {
         {/* Menu 2 (Có Collapse) */}
         {/* Quản lý y tế */}
         <NavItem
-          icon={<EmergencyIcon />}
+          icon={<MedicalServicesIcon />}
           text={tSidebar('title.medicalManagement')}
           onClick={handleToggleMedicalMenu}
           rightElement={openMedicalMenu ? <ExpandLess /> : <ExpandMore />}

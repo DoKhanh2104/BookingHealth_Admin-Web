@@ -5,7 +5,7 @@ import SideBar from './Sidebar';
 
 const AdminLayout = () => {
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f4f6f8' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F9FAFB' }}>
       {/* 1. Header cố định trên cùng */}
       <Header />
 

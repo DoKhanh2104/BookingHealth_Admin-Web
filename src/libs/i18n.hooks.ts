@@ -1,4 +1,11 @@
-import { createElement, createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import {
+  createElement,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from 'react';
 import { getNestedProperty, replaceArgs } from './i18n.utils';
 
 interface I18nContextType {
