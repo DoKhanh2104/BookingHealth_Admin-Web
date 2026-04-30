@@ -14,7 +14,7 @@ import {
   Rating,
   useTheme,
 } from '@mui/material';
-import { getDashboardCardSx } from './DashboardStyles';
+import { getDashboardCardSx, getCardHeaderSx, titleCardSx } from './DashboardStyles';
 import { type DashboardHooksType, type TopDoctor } from '../Dashboard.types';
 
 export const TopDoctors = ({ tDashboard, topDoctors }: DashboardHooksType) => {
@@ -24,8 +24,8 @@ export const TopDoctors = ({ tDashboard, topDoctors }: DashboardHooksType) => {
     <Card sx={getDashboardCardSx(theme)}>
       <CardHeader
         title={tDashboard('topDoctors.title')}
-        titleTypographyProps={{ fontWeight: 700 }}
-        sx={{ px: 4, color: theme.palette.text.primary }}
+        sx={getCardHeaderSx(theme)}
+        titleTypographyProps={{ sx: titleCardSx }}
       />
       <Divider />
       <CardContent>
@@ -36,6 +36,8 @@ export const TopDoctors = ({ tDashboard, topDoctors }: DashboardHooksType) => {
                 <Avatar sx={{ bgcolor: theme.palette.primary.light }}>{doctor.avatar}</Avatar>
               </ListItemAvatar>
               <ListItemText
+                primaryTypographyProps={{ component: 'div' }}
+                secondaryTypographyProps={{ component: 'div' }}
                 primary={
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="subtitle2" fontWeight="bold">

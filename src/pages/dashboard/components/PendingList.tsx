@@ -14,7 +14,7 @@ import {
   Chip,
   useTheme,
 } from '@mui/material';
-import { getDashboardCardSx } from './DashboardStyles';
+import { getDashboardCardSx, getCardHeaderSx, titleCardSx } from './DashboardStyles';
 import { type DashboardHooksType, type PendingDoctor } from '../Dashboard.types';
 
 export const PendingList = ({
@@ -29,8 +29,8 @@ export const PendingList = ({
       <CardHeader
         title={tDashboard('pending.title')}
         action={<Button color="primary">{tDashboard('pending.viewAll')}</Button>}
-        titleTypographyProps={{ fontWeight: 700 }}
-        sx={{ px: 4, color: theme.palette.text.primary }}
+        titleTypographyProps={{ sx: titleCardSx }}
+        sx={getCardHeaderSx(theme)}
       />
       <Divider />
       {isPendingActionEmpty ? (
@@ -47,7 +47,7 @@ export const PendingList = ({
           {tDashboard('pending.empty')}
         </CardContent>
       ) : (
-        <TableContainer sx={{ px: 4, py: 2 }}>
+        <TableContainer sx={{ px: { xs: 1, sm: 2, md: 4 }, py: 2, overflowX: 'auto' }}>
           <Table>
             <TableHead>
               <TableRow>

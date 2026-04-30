@@ -8,15 +8,21 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import {
   Search as SearchIcon,
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
+import { DRAWER_WIDTH } from './layoutConstants';
 
-const drawerWidth = 280;
+interface HeaderProps {
+  onToggleSidebar: () => void;
+}
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -62,13 +68,16 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const Header = () => {
+const Header = ({ onToggleSidebar }: HeaderProps) => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
   return (
     <AppBar
       position="fixed"
       sx={{
-        width: `calc(100% - ${drawerWidth}px)`,
-        ml: `${drawerWidth}px`,
+        width: isDesktop ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
+        ml: isDesktop ? `${DRAWER_WIDTH}px` : 0,
         // Hiệu ứng Kính (Glassmorphism) cực kỳ Wow
         backgroundColor: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(12px)',
@@ -77,25 +86,44 @@ const Header = () => {
         borderBottom: '1px solid',
         borderColor: 'divider',
         color: 'text.primary',
+        transition: theme.transitions.create(['width', 'margin'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
       }}
     >
       <Toolbar sx={{ minHeight: '76px !important', px: { xs: 2, md: 4 } }}>
-        {/* 1. Thanh tìm kiếm */}
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Tìm kiếm bệnh nhân, bác sĩ..."
-            inputProps={{ 'aria-label': 'search' }}
-          />
-        </Search>
+        {/* Hamburger menu — chỉ hiện trên mobile */}
+        {!isDesktop && (
+          <IconButton
+            color="inherit"
+            aria-label="open sidebar"
+            edge="start"
+            onClick={onToggleSidebar}
+            sx={{ mr: 1 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* 1. Thanh tìm kiếm — ẩn trên mobile nhỏ */}
+        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Tìm kiếm bệnh nhân, bác sĩ..."
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </Search>
+        </Box>
 
         {/* Khoảng trống đẩy các icon sang mép phải */}
         <Box sx={{ flexGrow: 1 }} />
 
         {/* 2. Cụm icon chức năng bên phải */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
           <Tooltip title="Cài đặt">
             <IconButton
               size="large"

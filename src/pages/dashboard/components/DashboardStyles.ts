@@ -14,3 +14,40 @@ export const getDashboardCardSx = (theme: Theme): SxProps<Theme> => {
     },
   };
 };
+
+/** Shared CardHeader sx — tránh lặp lại ở mỗi sub-component */
+export const getCardHeaderSx = (theme: Theme): SxProps<Theme> => ({
+  px: { xs: 2, sm: 3, md: 4 },
+  color: theme.palette.text.primary,
+});
+
+/** Shared CardContent center layout */
+export const cardContentCenterSx: SxProps<Theme> = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  py: 4,
+  // Đảm bảo chart/content không tràn ra ngoài
+  overflow: 'hidden',
+  '& > *': {
+    maxWidth: '100%',
+  },
+};
+
+/** Time filter dropdown style */
+export const getTimeFilterSx = (): SxProps<Theme> => ({
+  minWidth: { xs: 140, sm: 200 },
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '10px',
+    background: (theme: Theme) => alpha(theme.palette.background.paper, 0.8),
+  },
+  '& .MuiSelect-select': {
+    py: '8px',
+    fontSize: '0.875rem',
+  },
+});
+
+export const titleCardSx: SxProps<Theme> = {
+  fontWeight: 700,
+  fontSize: { xs: 12, sm: 16, md: 20 },
+};

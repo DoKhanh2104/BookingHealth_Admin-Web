@@ -7,9 +7,12 @@ import {
   ListItemText,
   Collapse,
   Box,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { GradientText } from '../components/GradientText';
-import type { SidebarItemProps } from '../types/Sidebar.types';
+import type { SidebarItemProps, SidebarProps } from '../types/Sidebar.types';
+import { DRAWER_WIDTH } from './layoutConstants';
 
 // Import Icons
 import {
@@ -32,8 +35,6 @@ import {
   Summarize as SummarizeIcon,
 } from '@mui/icons-material';
 import { useSidebarHooks } from '../hooks/Sidebar';
-
-const drawerWidth = 280;
 
 const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: SidebarItemProps) => {
   return (
@@ -66,7 +67,10 @@ const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: Side
   );
 };
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }: SidebarProps) {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
   const [openSystemMenu, setOpenSystemMenu] = useState(false);
   const [openMedicalMenu, setOpenMedicalMenu] = useState(false);
   const [openOperationMenu, setOpenOperationMenu] = useState(false);
@@ -135,19 +139,8 @@ export default function Sidebar() {
     },
   ];
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#fff',
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       {/* 1. Khu vực Logo */}
       <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <img src="./assets/logo.png" alt="BookingHealth Logo" width={40} />
@@ -210,6 +203,45 @@ export default function Sidebar() {
           </List>
         </Collapse>
       </List>
+    </>
+  );
+
+  // Desktop: permanent drawer
+  if (isDesktop) {
+    return (
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: DRAWER_WIDTH,
+            boxSizing: 'border-box',
+            backgroundColor: '#fff',
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+    );
+  }
+
+  // Mobile/Tablet: temporary drawer with overlay
+  return (
+    <Drawer
+      variant="temporary"
+      open={open}
+      onClose={onClose}
+      ModalProps={{ keepMounted: true }}
+      sx={{
+        [`& .MuiDrawer-paper`]: {
+          width: DRAWER_WIDTH,
+          boxSizing: 'border-box',
+          backgroundColor: '#fff',
+        },
+      }}
+    >
+      {drawerContent}
     </Drawer>
   );
 }

@@ -7,8 +7,6 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  alpha,
-  type Theme,
   Grid,
 } from '@mui/material';
 import { useState } from 'react';
@@ -26,6 +24,7 @@ import { SpecialtyDistribution } from './components/SpecialtyDistribution';
 import { TopDoctors } from './components/TopDoctors';
 import { RecentFeedbacks } from './components/RecentFeedbacks';
 import { RevenueTrend } from './components/RevenueTrend';
+import { getTimeFilterSx } from './components/DashboardStyles';
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -34,22 +33,13 @@ const Dashboard = () => {
 
   const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month'>('day');
 
-  const timeFilterStyle = {
-    minWidth: 200,
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '10px',
-      background: (theme: Theme) => alpha(theme.palette.background.paper, 0.8),
-    },
-    '& .MuiSelect-select': {
-      py: '8px',
-      fontSize: '0.875rem',
-    },
-  };
-
   return (
     <Main>
-      {/* Intro */}
-      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+      {/* Intro — responsive: column trên mobile, row trên desktop */}
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', mb: 4, gap: 2 }}
+      >
         <Stack spacing={0.5}>
           <Typography variant="h5" sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
             {tDashboard('title')}
@@ -60,7 +50,7 @@ const Dashboard = () => {
         </Stack>
 
         <Stack direction="row" sx={{ alignItems: 'center' }}>
-          <FormControl variant="outlined" size="small" sx={timeFilterStyle}>
+          <FormControl variant="outlined" size="small" sx={getTimeFilterSx()}>
             <InputLabel>{tDashboard('time.labelTime')}</InputLabel>
             <Select
               value={timeFilter}

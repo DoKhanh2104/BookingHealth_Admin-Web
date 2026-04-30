@@ -9,7 +9,7 @@ const Main = ({ children, sx, ...other }: MainLayoutProps) => {
         display: 'flex',
         flex: '1 1 auto',
         flexDirection: 'column',
-        px: 4,
+        px: { xs: 2, sm: 3, md: 4 },
         ...sx,
       }}
       {...other}

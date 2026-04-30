@@ -8,3 +8,9 @@ export interface SidebarItemProps extends ListItemButtonProps {
   isSubItem?: boolean;
   rightElement?: React.ReactNode;
 }
+
+export interface SidebarProps {
+  open: boolean;
+  onClose: () => void;
+}
+

@@ -14,7 +14,7 @@ import {
   Button,
   useTheme,
 } from '@mui/material';
-import { getDashboardCardSx } from './DashboardStyles';
+import { getDashboardCardSx, getCardHeaderSx, titleCardSx } from './DashboardStyles';
 import { type DashboardHooksType, type RecentFeedback } from '../Dashboard.types';
 
 export const RecentFeedbacks = ({ tDashboard, recentFeedbacks }: DashboardHooksType) => {
@@ -24,8 +24,8 @@ export const RecentFeedbacks = ({ tDashboard, recentFeedbacks }: DashboardHooksT
     <Card sx={getDashboardCardSx(theme)}>
       <CardHeader
         title={tDashboard('feedbacks.title')}
-        titleTypographyProps={{ fontWeight: 700 }}
-        sx={{ px: 4, color: theme.palette.text.primary }}
+        sx={getCardHeaderSx(theme)}
+        titleTypographyProps={{ sx: titleCardSx }}
       />
       <Divider />
       <CardContent sx={{ pt: 1 }}>
@@ -42,6 +42,8 @@ export const RecentFeedbacks = ({ tDashboard, recentFeedbacks }: DashboardHooksT
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
+                primaryTypographyProps={{ component: 'div' }}
+                secondaryTypographyProps={{ component: 'div' }}
                 primary={
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="subtitle2" fontWeight="bold">
