@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Drawer,
   List,
@@ -11,6 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { GradientText } from '../components/GradientText';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import type { SidebarItemProps, SidebarProps } from '../types/Sidebar.types';
 import { DRAWER_WIDTH } from './layoutConstants';
 
@@ -18,34 +18,36 @@ import { DRAWER_WIDTH } from './layoutConstants';
 import {
   Dashboard as DashboardIcon,
   SettingsSuggest as SettingsSuggestIcon,
-  LocalHospital as LocalHospitalIcon,
-  People as PeopleIcon,
-  CalendarMonth as CalendarMonthIcon,
-  Category as CategoryIcon,
   ExpandLess,
   ExpandMore,
   MedicalServices as MedicalServicesIcon,
   AccountTree as AccountTreeIcon,
-  HomeRepairService as HomeRepairServiceIcon,
-  Schedule as ScheduleIcon,
-  Accessible as AccessibleIcon,
-  Games as GamesIcon,
-  NotificationsActive as NotificationsActiveIcon,
-  AppSettingsAlt as AppSettingsAltIcon,
-  Summarize as SummarizeIcon,
 } from '@mui/icons-material';
 import { useSidebarHooks } from '../hooks/Sidebar';
 
-const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: SidebarItemProps) => {
+const NavItem = ({
+  icon,
+  text,
+  active,
+  isSubItem,
+  rightElement,
+  path,
+  ...props
+}: SidebarItemProps) => {
+  const location = useLocation();
+  const isActive = active !== undefined ? active : path ? location.pathname === path : false;
+
   return (
     <ListItemButton
+      component={path ? RouterLink : 'div'}
+      {...(path ? { to: path } : {})}
       {...props}
       sx={{
         borderRadius: 2,
         mb: 0.5,
         pl: isSubItem ? 4 : 2,
-        bgcolor: active ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
-        color: active ? 'primary.main' : 'text.secondary',
+        bgcolor: isActive ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+        color: isActive ? 'primary.main' : 'text.secondary',
         '&:hover': {
           bgcolor: 'rgba(25, 118, 210, 0.12)',
         },
@@ -57,7 +59,7 @@ const NavItem = ({ icon, text, active, isSubItem, rightElement, ...props }: Side
         primary={text}
         primaryTypographyProps={{
           sx: {
-            fontWeight: active ? 600 : 500,
+            fontWeight: isActive ? 600 : 500,
             fontSize: 14,
           },
         }}
@@ -71,73 +73,18 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
-  const [openSystemMenu, setOpenSystemMenu] = useState(false);
-  const [openMedicalMenu, setOpenMedicalMenu] = useState(false);
-  const [openOperationMenu, setOpenOperationMenu] = useState(false);
-
-  const { tSidebar } = useSidebarHooks();
-
-  const handleToggleSystemMenu = () => {
-    setOpenSystemMenu(!openSystemMenu);
-  };
-
-  const handleToggleMedicalMenu = () => {
-    setOpenMedicalMenu(!openMedicalMenu);
-  };
-
-  const handleToggleOperationMenu = () => {
-    setOpenOperationMenu(!openOperationMenu);
-  };
-
-  const medicalMenuItems = [
-    {
-      text: tSidebar('medicalManagement.specialtyManagement'),
-      icon: <CategoryIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('medicalManagement.clinicManagement'),
-      icon: <LocalHospitalIcon fontSize="small" />,
-    },
-    { text: tSidebar('medicalManagement.doctorList'), icon: <PeopleIcon fontSize="small" /> },
-    {
-      text: tSidebar('medicalManagement.serviceCatalog'),
-      icon: <HomeRepairServiceIcon fontSize="small" />,
-    },
-  ];
-
-  const operationMenuItems = [
-    {
-      text: tSidebar('operationManagement.appointmentManagement'),
-      icon: <CalendarMonthIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('operationManagement.workScheduleManagement'),
-      icon: <ScheduleIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('operationManagement.patientList'),
-      icon: <AccessibleIcon fontSize="small" />,
-    },
-  ];
-
-  const systemMenuItems = [
-    {
-      text: tSidebar('systemAdministration.userManagement'),
-      icon: <GamesIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('systemAdministration.notificationManagement'),
-      icon: <NotificationsActiveIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('systemAdministration.configurationManagement'),
-      icon: <AppSettingsAltIcon fontSize="small" />,
-    },
-    {
-      text: tSidebar('systemAdministration.reportManagement'),
-      icon: <SummarizeIcon fontSize="small" />,
-    },
-  ];
+  const {
+    tSidebar,
+    openSystemMenu,
+    openMedicalMenu,
+    openOperationMenu,
+    handleToggleSystemMenu,
+    handleToggleMedicalMenu,
+    handleToggleOperationMenu,
+    medicalMenuItems,
+    operationMenuItems,
+    systemMenuItems,
+  } = useSidebarHooks();
 
   const drawerContent = (
     <>
@@ -152,7 +99,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       {/* 2. Danh sách Menu */}
       <List sx={{ px: 2 }}>
         {/* Menu 1 */}
-        <NavItem icon={<DashboardIcon />} text={tSidebar('title.dashboard')} active />
+        <NavItem icon={<DashboardIcon />} text={tSidebar('title.dashboard')} path="/" />
 
         {/* Menu 2 (Có Collapse) */}
         {/* Quản lý y tế */}
@@ -166,7 +113,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <Collapse in={openMedicalMenu} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {medicalMenuItems.map((item, index) => (
-              <NavItem key={index} isSubItem icon={item.icon} text={item.text} />
+              <NavItem key={index} isSubItem icon={item.icon} text={item.text} path={item.path} />
             ))}
           </List>
         </Collapse>
@@ -182,7 +129,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <Collapse in={openOperationMenu} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {operationMenuItems.map((item, index) => (
-              <NavItem key={index} isSubItem icon={item.icon} text={item.text} />
+              <NavItem key={index} isSubItem icon={item.icon} text={item.text} path={item.path} />
             ))}
           </List>
         </Collapse>
@@ -198,7 +145,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <Collapse in={openSystemMenu} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {systemMenuItems.map((item, index) => (
-              <NavItem key={index} isSubItem icon={item.icon} text={item.text} />
+              <NavItem key={index} isSubItem icon={item.icon} text={item.text} path={item.path} />
             ))}
           </List>
         </Collapse>

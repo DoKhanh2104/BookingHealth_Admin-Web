@@ -20,7 +20,7 @@ export default {
   },
 
   systemAdministration: {
-    userManagement: 'Phân quyền nhân sự',
+    userManagement: 'Quản lý người dùng',
     notificationManagement: 'Quản lý thông báo',
     configurationManagement: 'Quản lý cấu hình',
     reportManagement: 'Quản lý báo cáo',
