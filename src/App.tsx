@@ -10,12 +10,15 @@ const messages = {
   ja,
 };
 
+import { Toaster } from 'sonner';
+
 const App = () => {
   return (
     <>
       <I18nProvider messages={messages}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
+          <Toaster richColors position="top-right" closeButton />
           <RouterProvider router={router} />
         </ThemeProvider>
       </I18nProvider>

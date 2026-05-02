@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Dashboard from '../../pages/dashboard/Dashboard';
 import AdminLayout from '../../layouts/AdminLayout';
-import ManageUser from '../../pages/manageUser/ManageUser';
+import ManageUser from '../../pages/manage-user/ManageUser';
 
 export const router = createBrowserRouter([
   {

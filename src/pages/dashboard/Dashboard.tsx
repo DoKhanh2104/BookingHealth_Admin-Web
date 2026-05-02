@@ -38,7 +38,12 @@ const Dashboard = () => {
       {/* Intro — responsive: column trên mobile, row trên desktop */}
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', mb: 4, gap: 2 }}
+        sx={{
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          mb: 4,
+          gap: 2,
+        }}
       >
         <Stack spacing={0.5}>
           <Typography variant="h5" sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>

@@ -20,4 +20,3 @@ export interface NavMenuItem {
   icon: React.ReactNode;
   path?: string;
 }
-

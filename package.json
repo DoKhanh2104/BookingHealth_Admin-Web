@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "test": "vitest run --passWithNoTests",
-    "ci": "yarn format && yarn lint --max-warnings 0 && yarn test && yarn build"
+    "ci": "yarn lint --max-warnings 0 && yarn test && yarn build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -19,9 +19,11 @@
     "@mui/icons-material": "5",
     "@mui/material": "5",
     "@mui/x-charts": "^9.0.4",
+    "axios": "^1.15.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.14.1"
+    "react-router-dom": "^7.14.1",
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
