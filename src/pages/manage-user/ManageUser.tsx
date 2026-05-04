@@ -21,6 +21,7 @@ import { SearchFilter } from '../../components/SearchFilter';
 import { useManageUserHooks } from './ManageUser.hooks';
 import ModalCreateUser from './components/ModalCreateUser';
 import ModalUpdateUser from './components/ModalUpdateUser';
+import ModalConfirm from './components/ModalConfirm';
 
 const ManageUser = () => {
   const {
@@ -46,8 +47,16 @@ const ManageUser = () => {
     handleFilterChange,
     handleClear,
     getRoleColor,
+    getRoleLabel,
     getStatusColor,
+    getStatusLabel,
+    isConfirmModalOpen,
+    handleOpenConfirmModal,
+    handleCloseConfirmModal,
     refreshUsers,
+    validateUser,
+    handleUpdateUser,
+    handleBanUser,
   } = useManageUserHooks();
 
   return (
@@ -107,19 +116,19 @@ const ManageUser = () => {
                   <TableCell>{user.phoneNumber}</TableCell>
                   <TableCell>
                     <Chip
-                      label={user.role}
+                      label={getRoleLabel(user.role)}
                       size="small"
                       color={getRoleColor(user.role)}
                       variant="outlined"
-                      sx={{ fontWeight: 500, minWidth: 70, justifyContent: 'center' }}
+                      sx={{ minWidth: 90, justifyContent: 'center', fontWeight: 600 }}
                     />
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={user.status}
+                      label={getStatusLabel(user.status)}
                       size="small"
                       color={getStatusColor(user.status)}
-                      sx={{ fontWeight: 500, minWidth: 80, justifyContent: 'center' }}
+                      sx={{ minWidth: 90, justifyContent: 'center', fontWeight: 600 }}
                     />
                   </TableCell>
                   <TableCell>
@@ -134,7 +143,14 @@ const ManageUser = () => {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Xóa">
-                        <IconButton size="small" color="error">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleOpenConfirmModal(user.id)}
+                          disabled={
+                            user.status === 'Inactive' || user.status === 0 || user.status === '0'
+                          }
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -169,13 +185,28 @@ const ManageUser = () => {
         open={isCreateModalOpen}
         onClose={handleCloseModals}
         onSuccess={refreshUsers}
+        validateUser={validateUser}
       />
 
       <ModalUpdateUser
+        key={selectedUser?.id || 'update-modal'}
         open={isUpdateModalOpen}
         onClose={handleCloseModals}
         onSuccess={refreshUsers}
         user={selectedUser}
+        validateUser={validateUser}
+        onUpdate={handleUpdateUser}
+      />
+
+      <ModalConfirm
+        open={isConfirmModalOpen}
+        onClose={handleCloseConfirmModal}
+        onConfirm={handleBanUser}
+        title={t('ModalConfirm.delete.title')}
+        message={t('ModalConfirm.delete.message')}
+        confirmText={t('ModalConfirm.delete.confirm')}
+        cancelText={t('ModalConfirm.delete.cancel')}
+        color="error"
       />
     </Main>
   );

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
-import type { ChipColor, User } from './ManageUser.types';
+import type { ChipColor, CreateUserPayload, UpdateUserPayload, User } from './ManageUser.types';
 import { userService } from '../../services/userService';
+import { toast } from 'sonner';
 
 export const useManageUserHooks = () => {
   const t = useTranslation('ManageUser');
@@ -42,6 +43,20 @@ export const useManageUserHooks = () => {
     }
   }, []);
 
+  const handleUpdateUser = async (id: number | string, data: UpdateUserPayload) => {
+    try {
+      await userService.updateUser(id, data);
+      toast.success(t('ModalUpdate.messages.success') || 'Cập nhật thành công!');
+      setIsUpdateModalOpen(false);
+      setSelectedUser(null);
+      fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      return { success: false, error: error as Error };
+    }
+  };
+
   useEffect(() => {
     Promise.resolve().then(() => fetchUsers());
   }, [fetchUsers]);
@@ -74,6 +89,9 @@ export const useManageUserHooks = () => {
     const filter = statusFilter.toLowerCase();
 
     return allUsers.filter((user) => {
+      // Không hiển thị Admin trong danh sách quản lý người dùng
+      if (user.role === 'ADMIN') return false;
+
       const userName = removeAccents((user.name || '').toLowerCase());
       const userEmail = (user.email || '').toLowerCase();
       const userPhone = user.phone || '';
@@ -85,7 +103,11 @@ export const useManageUserHooks = () => {
         userPhone.includes(search);
 
       const matchesStatus =
-        filter === 'all' || (user.status || '').toString().toLowerCase() === filter;
+        filter === 'all' ||
+        (user.status || '').toString().toLowerCase() === filter ||
+        (filter === '1' && (user.status || '').toString().toLowerCase() === 'active') ||
+        (filter === '0' && (user.status || '').toString().toLowerCase() === 'inactive') ||
+        (filter === '2' && (user.status || '').toString().toLowerCase() === 'banned');
 
       return matchesSearch && matchesStatus;
     });
@@ -133,21 +155,61 @@ export const useManageUserHooks = () => {
       case '0':
         return 'warning';
       case 'banned':
+      case '2':
         return 'error';
       default:
         return 'default';
     }
   };
 
-  const getRoleColor = (role?: string): ChipColor => {
+  const getStatusLabel = (status: string | number): string => {
+    if (status === undefined || status === null) return '';
+    const statusStr = status.toString().toLowerCase();
+    switch (statusStr) {
+      case 'active':
+      case '1':
+        return t('filterOptions.active');
+      case 'inactive':
+      case '0':
+        return t('filterOptions.inactive');
+      case 'banned':
+      case '2':
+        return t('filterOptions.banned');
+      default:
+        return status.toString();
+    }
+  };
+
+  const getRoleLabel = (role?: string | number): string => {
+    if (!role) return 'N/A';
+    const roleStr = role.toString().toUpperCase();
+    switch (roleStr) {
+      case 'ADMIN':
+      case '1':
+        return t('ModalUpdate.fields.role.admin');
+      case 'DOCTOR':
+      case '3':
+        return t('ModalUpdate.fields.role.doctor');
+      case 'USER':
+      case '2':
+        return t('ModalUpdate.fields.role.user');
+      default:
+        return role.toString();
+    }
+  };
+
+  const getRoleColor = (role?: string | number): ChipColor => {
     if (!role) return 'default';
     const roleStr = role.toString().toLowerCase();
     switch (roleStr) {
       case 'admin':
+      case '1':
         return 'primary';
       case 'doctor':
+      case '3':
         return 'secondary';
       case 'user':
+      case '2':
         return 'info';
       default:
         return 'default';
@@ -156,13 +218,79 @@ export const useManageUserHooks = () => {
 
   const filterOptions = [
     { value: 'all', label: t('filterOptions.all') },
-    { value: 'active', label: t('filterOptions.active') },
-    { value: 'inactive', label: t('filterOptions.inactive') },
-    { value: 'banned', label: t('filterOptions.banned') },
+    { value: '1', label: t('filterOptions.active') },
+    { value: '0', label: t('filterOptions.inactive') },
+    { value: '2', label: t('filterOptions.banned') },
   ];
+
+  const validateUser = (
+    data: CreateUserPayload | UpdateUserPayload,
+    type: 'create' | 'update' = 'create',
+  ) => {
+    const errors: Record<string, string> = {};
+
+    if (!data.name?.trim()) {
+      errors.name = t('ModalCreate.messages.validation.nameRequired');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!data.email?.trim()) {
+      errors.email = t('ModalCreate.messages.validation.emailRequired');
+    } else if (!emailRegex.test(data.email)) {
+      errors.email = t('ModalCreate.messages.validation.emailInvalid');
+    }
+
+    if (!data.phone?.trim()) {
+      errors.phone = t('ModalCreate.messages.validation.phoneRequired');
+    } else if (data.phone.length < 10 || data.phone.length > 11) {
+      errors.phone = t('ModalCreate.messages.validation.phoneInvalid');
+    }
+
+    if (type === 'create') {
+      const password = (data as CreateUserPayload).password || '';
+      if (!password.trim()) {
+        errors.password = t('ModalCreate.messages.validation.passwordRequired');
+      } else if (password.length < 8) {
+        errors.password = t('ModalCreate.messages.validation.passwordMin');
+      }
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  };
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [userToBan, setUserToBan] = useState<number | string | null>(null);
+
+  const handleOpenConfirmModal = (id: number | string) => {
+    setUserToBan(id);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleCloseConfirmModal = () => {
+    setIsConfirmModalOpen(false);
+    setUserToBan(null);
+  };
+
+  const handleBanUser = async () => {
+    if (!userToBan) return { success: false };
+    try {
+      await userService.deleteUser(userToBan);
+      toast.success(t('ModalUpdate.messages.delete') || 'Tài khoản đã bị cấm khỏi hệ thống!');
+      fetchUsers();
+      handleCloseConfirmModal();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to ban user:', error);
+      return { success: false, error: error as Error };
+    }
+  };
 
   return {
     t,
+    validateUser,
     columns,
     users: paginatedUsers,
     loading,
@@ -174,17 +302,24 @@ export const useManageUserHooks = () => {
     filterOptions,
     isCreateModalOpen,
     isUpdateModalOpen,
+    isConfirmModalOpen,
     selectedUser,
     handleOpenCreateModal,
     handleOpenUpdateModal,
+    handleOpenConfirmModal,
     handleCloseModals,
+    handleCloseConfirmModal,
     handleChangePage,
     handleChangeRowsPerPage,
     handleSearchChange,
     handleFilterChange,
     handleClear,
     getStatusColor,
+    getStatusLabel,
     getRoleColor,
+    getRoleLabel,
     refreshUsers: fetchUsers,
+    handleUpdateUser,
+    handleBanUser,
   };
 };

@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material';
 import type { TransitionProps } from '@mui/material/transitions';
 import { userService } from '../../../services/userService';
-import type { CreateUserPayload } from '../ManageUser.types';
+import type { CreateUserPayload, UpdateUserPayload } from '../ManageUser.types';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useTranslation } from '../../../libs/i18n.hooks';
@@ -43,6 +43,10 @@ interface ModalCreateUserProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  validateUser: (
+    data: CreateUserPayload | UpdateUserPayload,
+    type?: 'create' | 'update',
+  ) => { isValid: boolean; errors: Record<string, string> };
 }
 
 interface BackendErrorResponse {
@@ -50,7 +54,12 @@ interface BackendErrorResponse {
   message?: string;
 }
 
-const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ open, onClose, onSuccess }) => {
+const ModalCreateUser: React.FC<ModalCreateUserProps> = ({
+  open,
+  onClose,
+  onSuccess,
+  validateUser,
+}) => {
   const t = useTranslation('ManageUser');
   const [formData, setFormData] = useState<CreateUserPayload>({
     name: '',
@@ -102,6 +111,13 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ open, onClose, onSucc
 
   const handleSubmit = async () => {
     if (loading) return;
+
+    // Kiểm tra lỗi ở Frontend bằng hàm từ hook
+    const { isValid, errors: validationErrors } = validateUser(formData, 'create');
+    if (!isValid) {
+      setErrors(validationErrors);
+      return;
+    }
 
     setLoading(true);
 

@@ -8,8 +8,8 @@ export default {
   filterOptions: {
     all: 'Tất cả trạng thái',
     active: 'Hoạt động',
-    inactive: 'Không hoạt động',
-    banned: 'Đã chặn',
+    inactive: 'Tạm dừng',
+    banned: 'Bị cấm',
   },
   columns: {
     id: 'ID',
@@ -52,6 +52,15 @@ export default {
       success: 'Tạo tài khoản thành công!',
       connectionError: 'Có lỗi xảy ra khi kết nối đến máy chủ!',
       invalidInput: 'Thông tin nhập vào không hợp lệ!',
+      validation: {
+        nameRequired: 'Tên người dùng không được để trống',
+        emailRequired: 'Email không được để trống',
+        emailInvalid: 'Địa chỉ email không đúng định dạng',
+        phoneRequired: 'Số điện thoại không được để trống',
+        phoneInvalid: 'Số điện thoại phải từ 10-11 số',
+        passwordRequired: 'Mật khẩu không được để trống',
+        passwordMin: 'Mật khẩu phải có ít nhất 8 ký tự',
+      },
     },
   },
   ModalUpdate: {
@@ -65,19 +74,34 @@ export default {
       phone: 'Số điện thoại',
       role: {
         label: 'Vai trò',
-        user: 'User',
+        user: 'Người dùng',
         admin: 'Admin',
         doctor: 'Bác sĩ',
       },
       status: {
         label: 'Trạng thái',
         active: 'Hoạt động',
-        inactive: 'Không hoạt động',
+        inactive: 'Tạm dừng',
+        banned: 'Bị cấm',
       },
     },
     buttons: {
       cancel: 'Hủy bỏ',
       submit: 'Lưu thay đổi',
+    },
+    messages: {
+      success: 'Cập nhật thành công!',
+      connectionError: 'Có lỗi xảy ra khi kết nối đến máy chủ!',
+      invalidInput: 'Thông tin nhập vào không hợp lệ!',
+      delete: 'Xóa tài khoản thành công!',
+    },
+  },
+  ModalConfirm: {
+    delete: {
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa tài khoản này không? Hành động này không thể hoàn tác.',
+      confirm: 'Xác nhận xóa',
+      cancel: 'Hủy bỏ',
     },
   },
 };

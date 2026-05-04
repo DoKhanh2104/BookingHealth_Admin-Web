@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,8 +14,11 @@ import {
   Avatar,
   Slide,
   InputAdornment,
+  CircularProgress,
 } from '@mui/material';
 import type { TransitionProps } from '@mui/material/transitions';
+import axios from 'axios';
+import { toast } from 'sonner';
 import {
   Close as CloseIcon,
   CloudUpload as CloudUploadIcon,
@@ -23,7 +26,7 @@ import {
   Email as EmailIcon,
   Phone as PhoneIcon,
 } from '@mui/icons-material';
-import type { User } from '../ManageUser.types';
+import type { CreateUserPayload, UpdateUserPayload, User } from '../ManageUser.types';
 import { useTranslation } from '../../../libs/i18n.hooks';
 
 const Transition = React.forwardRef(function Transition(
@@ -40,43 +43,63 @@ interface ModalUpdateUserProps {
   onClose: () => void;
   onSuccess: () => void;
   user: User | null;
+  validateUser: (
+    data: CreateUserPayload | UpdateUserPayload,
+    type?: 'create' | 'update',
+  ) => { isValid: boolean; errors: Record<string, string> };
+  onUpdate: (
+    id: number | string,
+    data: UpdateUserPayload,
+  ) => Promise<{ success: boolean; error?: Error }>;
 }
 
-const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSuccess, user }) => {
+interface BackendErrorResponse {
+  code?: string | number;
+  message?: string;
+}
+
+const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
+  open,
+  onClose,
+  user,
+  validateUser,
+  onUpdate,
+}) => {
   const t = useTranslation('ManageUser');
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: '',
-    status: 1,
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || user?.phoneNumber || '',
+    role: (user?.role || 'USER').toUpperCase(),
+    status: (() => {
+      const s = (user?.status ?? '').toString().toLowerCase();
+      if (s === '1' || s === 'active') return 1;
+      if (s === '2' || s === 'banned') return 2;
+      return 0; // inactive
+    })(),
   });
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (user) {
-      Promise.resolve().then(() => {
-        setFormData({
-          name: user.name || '',
-          email: user.email || '',
-          phone: user.phone || user.phoneNumber || '',
-          role: user.role || 'USER',
-          status: user.status === 'Active' || user.status === 1 ? 1 : 0,
-        });
-        setAvatarPreview(user.avatar || null);
-      });
-    }
-  }, [user]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
@@ -85,10 +108,54 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
     }
   };
 
-  const handleSubmit = () => {
-    console.log('Update user:', { ...formData, avatar: avatarPreview });
-    onSuccess();
-    onClose();
+  const handleSubmit = async () => {
+    if (loading || !user) return;
+
+    const { isValid, errors: validationErrors } = validateUser(formData, 'update');
+    if (!isValid) {
+      setErrors(validationErrors);
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const data = new FormData();
+      data.append('phone', formData.phone);
+      data.append('email', formData.email);
+      data.append('name', formData.name);
+      data.append('role', formData.role);
+      data.append('status', String(formData.status));
+
+      if (avatarFile) {
+        data.append('avatar', avatarFile);
+      }
+
+      const result = await onUpdate(user.id, data as UpdateUserPayload);
+
+      if (!result.success) {
+        const error = result.error;
+        if (axios.isAxiosError(error)) {
+          const responseData = error.response?.data as BackendErrorResponse;
+          if (responseData?.message) {
+            const msg = responseData.message;
+            const translatedErrors: Record<string, string> = {};
+            if (msg.includes('EMAIL')) translatedErrors.email = msg;
+            else if (msg.includes('NAME')) translatedErrors.name = msg;
+
+            if (Object.keys(translatedErrors).length > 0) {
+              setErrors(translatedErrors);
+            } else {
+              toast.error(msg);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      toast.error('Có lỗi xảy ra khi cập nhật!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,6 +232,8 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
               value={formData.name}
               onChange={handleChange}
               variant="outlined"
+              error={!!errors.name}
+              helperText={errors.name}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -182,6 +251,8 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
               type="email"
               value={formData.email}
               onChange={handleChange}
+              error={!!errors.email}
+              helperText={errors.email}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -216,9 +287,15 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
               name="role"
               value={formData.role}
               onChange={handleChange}
+              disabled={formData.role === 'ADMIN'}
+              sx={{
+                '& .MuiInputBase-input.Mui-disabled': {
+                  WebkitTextFillColor: (theme) => theme.palette.text.primary,
+                  bgcolor: 'action.hover',
+                },
+              }}
             >
               <MenuItem value="USER">{t('ModalUpdate.fields.role.user')}</MenuItem>
-              <MenuItem value="ADMIN">{t('ModalUpdate.fields.role.admin')}</MenuItem>
               <MenuItem value="DOCTOR">{t('ModalUpdate.fields.role.doctor')}</MenuItem>
             </TextField>
           </Grid>
@@ -233,6 +310,7 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
             >
               <MenuItem value={1}>{t('ModalUpdate.fields.status.active')}</MenuItem>
               <MenuItem value={0}>{t('ModalUpdate.fields.status.inactive')}</MenuItem>
+              <MenuItem value={2}>{t('ModalUpdate.fields.status.banned')}</MenuItem>
             </TextField>
           </Grid>
         </Grid>
@@ -252,8 +330,16 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({ open, onClose, onSucc
             py: 1,
             boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
           }}
+          disabled={loading}
         >
-          {t('ModalUpdate.buttons.submit')}
+          {loading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={20} color="inherit" />
+              <span>{t('ModalCreate.buttons.processing') || 'Đang xử lý...'}</span>
+            </Box>
+          ) : (
+            t('ModalUpdate.buttons.submit')
+          )}
         </Button>
       </DialogActions>
     </Dialog>

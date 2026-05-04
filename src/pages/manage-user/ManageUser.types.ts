@@ -33,6 +33,7 @@ export interface CreateUserPayload {
 export interface UpdateUserPayload {
   name?: string;
   email?: string;
+  phone?: string;
   role?: string;
   status?: number | string;
   avatar?: string | null;

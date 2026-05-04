@@ -23,8 +23,14 @@ export const userService = {
         (user: User): User => ({
           ...user,
           phoneNumber: user.phone,
-          role: user.roles?.[0]?.roleName || 'N/A',
-          status: user.status === 1 ? 'Active' : 'Inactive',
+          role: (() => {
+            const r = (user.roles?.[0]?.roleName || user.role || '').toString();
+            if (r === '1') return 'ADMIN';
+            if (r === '2') return 'USER';
+            if (r === '3') return 'DOCTOR';
+            return r || 'USER';
+          })(),
+          status: user.status === 1 ? 'Active' : user.status === 2 ? 'Banned' : 'Inactive',
         }),
       );
 
@@ -51,7 +57,6 @@ export const userService = {
 
   // deleteUser
   deleteUser: async (id: number | string) => {
-    const response = await apiClient.delete(`/admin/users/${id}`);
-    return response.data;
+    await apiClient.patch(`/admin/users/${id}`);
   },
 };
