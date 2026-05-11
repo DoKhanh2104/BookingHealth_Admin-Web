@@ -10,6 +10,7 @@ const messages = {
   ja,
 };
 
+import { AuthProvider } from './contexts/AuthProvider';
 import { Toaster } from 'sonner';
 
 const App = () => {
@@ -18,8 +19,10 @@ const App = () => {
       <I18nProvider messages={messages}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Toaster richColors position="top-right" closeButton />
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <Toaster richColors position="top-right" closeButton />
+            <RouterProvider router={router} />
+          </AuthProvider>
         </ThemeProvider>
       </I18nProvider>
     </>
