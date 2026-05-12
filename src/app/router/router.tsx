@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import Dashboard from '../../pages/dashboard/Dashboard';
 import AdminLayout from '../../layouts/AdminLayout';
 import ManageUser from '../../pages/manage-user/ManageUser';
+import ManageSpecialty from '../../pages/manage-specialty/ManageSpecialty';
 import PageNotFound from '../../pages/error/PageNotFound';
 import AuthLayout from '../../layouts/AuthLayout';
 import Login from '../../pages/auth/Login';
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: 'user-management',
         element: <ManageUser />,
+      },
+      {
+        path: 'manage-specialty',
+        element: <ManageSpecialty />,
       },
     ],
   },

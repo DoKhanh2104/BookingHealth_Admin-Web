@@ -39,6 +39,7 @@ export const useSidebarHooks = () => {
     {
       text: tSidebar('medicalManagement.specialtyManagement'),
       icon: React.createElement(CategoryIcon, { fontSize: 'small' }),
+      path: '/manage-specialty',
     },
     {
       text: tSidebar('medicalManagement.clinicManagement'),
