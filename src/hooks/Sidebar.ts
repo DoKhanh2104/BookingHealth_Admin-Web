@@ -44,10 +44,12 @@ export const useSidebarHooks = () => {
     {
       text: tSidebar('medicalManagement.clinicManagement'),
       icon: React.createElement(LocalHospitalIcon, { fontSize: 'small' }),
+      path: '/manage-clinic',
     },
     {
       text: tSidebar('medicalManagement.doctorList'),
       icon: React.createElement(PeopleIcon, { fontSize: 'small' }),
+      path: '/manage-doctor',
     },
     {
       text: tSidebar('medicalManagement.serviceCatalog'),

@@ -22,18 +22,19 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Clear as ClearIcon,
+  Map as MapIcon,
 } from '@mui/icons-material';
 import Main from '../../layouts/Main';
 import { HeaderPage } from '../../components/HeaderPage';
-import { useManageSpecialtyHooks } from './ManageSpecialty.hooks';
-import ModalCreateSpecialty from './components/ModalCreateSpecialty';
-import ModalUpdateSpecialty from './components/ModalUpdateSpecialty';
+import { useManageClinicHooks } from './ManageClinic.hooks';
+import ModalCreateClinic from './components/ModalCreateClinic';
+import ModalUpdateClinic from './components/ModalUpdateClinic';
 import ModalConfirm from '../manage-user/components/ModalConfirm'; // Tái sử dụng ModalConfirm
 
-const ManageSpecialty = () => {
+const ManageClinic = () => {
   const {
     t,
-    specialties,
+    clinics,
     loading,
     page,
     rowsPerPage,
@@ -46,7 +47,7 @@ const ManageSpecialty = () => {
     openCreate,
     openUpdate,
     openDelete,
-    selectedSpecialty,
+    selectedClinic,
     handleOpenCreate,
     handleCloseCreate,
     handleOpenUpdate,
@@ -56,7 +57,7 @@ const ManageSpecialty = () => {
     handleCreate,
     handleUpdate,
     handleDelete,
-  } = useManageSpecialtyHooks();
+  } = useManageClinicHooks();
 
   return (
     <Main>
@@ -76,7 +77,7 @@ const ManageSpecialty = () => {
       />
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', mt: 3, p: 2 }}>
-        {/* Search Bar - Client-side filtering */}
+        {/* Search Bar */}
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}>
           <TextField
             variant="outlined"
@@ -103,35 +104,40 @@ const ManageSpecialty = () => {
         </Box>
 
         {loading && <LinearProgress />}
+        
         <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: '#fff' }}>
                 <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2 }}>
-                  {t('columns.id')}
+                  {t('columns.stt')}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2 }}>
                   {t('columns.name')}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2 }}>
-                  {t('columns.description')}
+                  {t('columns.address')}
                 </TableCell>
-                <TableCell
-                  sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}
-                >
+                <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2 }}>
+                  {t('columns.map')}
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}>
+                  {t('columns.doctorCount')}
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}>
                   {t('columns.actions')}
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {specialties.map((specialty) => (
+              {clinics.map((clinic, index) => (
                 <TableRow
-                  key={specialty.id}
+                  key={clinic.id}
                   hover
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell>{specialty.id}</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>{specialty.specialtyName}</TableCell>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{clinic.clinicName}</TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"
@@ -141,11 +147,34 @@ const ManageSpecialty = () => {
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
-                        maxWidth: 500,
+                        maxWidth: 300,
                       }}
                     >
-                      {specialty.description || '-'}
+                      {clinic.address || '-'}
                     </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    {clinic.longitude != null && clinic.latitude != null ? (
+                      <Tooltip title={`${clinic.latitude}, ${clinic.longitude}`}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() =>
+                            window.open(
+                              `https://www.google.com/maps?q=${clinic.latitude},${clinic.longitude}`,
+                              '_blank'
+                            )
+                          }
+                        >
+                          <MapIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <MapIcon fontSize="small" color="disabled" />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {clinic.soLuongBacSi !== undefined ? clinic.soLuongBacSi : 0}
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -153,7 +182,7 @@ const ManageSpecialty = () => {
                         <IconButton
                           size="small"
                           color="primary"
-                          onClick={() => handleOpenUpdate(specialty)}
+                          onClick={() => handleOpenUpdate(clinic)}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -162,7 +191,7 @@ const ManageSpecialty = () => {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleOpenDelete(specialty)}
+                          onClick={() => handleOpenDelete(clinic)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -171,9 +200,9 @@ const ManageSpecialty = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {!loading && specialties.length === 0 && (
+              {!loading && clinics.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     Chưa có dữ liệu
                   </TableCell>
                 </TableRow>
@@ -194,18 +223,18 @@ const ManageSpecialty = () => {
         />
       </Card>
 
-      <ModalCreateSpecialty
+      <ModalCreateClinic
         open={openCreate}
         onClose={handleCloseCreate}
         onConfirm={handleCreate}
       />
 
-      <ModalUpdateSpecialty
-        key={selectedSpecialty?.id || 'update-modal'}
+      <ModalUpdateClinic
+        key={selectedClinic?.id || 'update-modal'}
         open={openUpdate}
         onClose={handleCloseUpdate}
         onConfirm={handleUpdate}
-        specialty={selectedSpecialty}
+        clinic={selectedClinic}
       />
 
       <ModalConfirm
@@ -222,4 +251,4 @@ const ManageSpecialty = () => {
   );
 };
 
-export default ManageSpecialty;
+export default ManageClinic;

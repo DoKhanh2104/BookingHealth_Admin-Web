@@ -1,0 +1,46 @@
+export default {
+  title: 'Quản lý danh sách phòng khám',
+  description: 'Quản lý thông tin và danh sách các cơ sở y tế',
+  searchPlaceholder: 'Tìm kiếm cơ sở y tế...',
+  columns: {
+    stt: 'STT',
+    id: 'Mã',
+    name: 'Tên Cơ Sở',
+    address: 'Địa Chỉ',
+    map: 'Bản Đồ',
+    longitude: 'Kinh Độ',
+    latitude: 'Vĩ Độ',
+    doctorCount: 'Số Lượng BS',
+    actions: 'Hành động',
+  },
+  buttons: {
+    create: 'Thêm cơ sở y tế',
+    edit: 'Sửa',
+    delete: 'Xóa',
+    cancel: 'Hủy',
+    save: 'Lưu',
+    search: 'Tìm kiếm',
+  },
+  modals: {
+    createTitle: 'Thêm Cơ Sở Y Tế Mới',
+    updateTitle: 'Cập nhật Cơ Sở Y Tế',
+    deleteTitle: 'Xác nhận xóa',
+    deleteContent:
+      'Bạn có chắc chắn muốn xóa phòng khám này không? Hành động này không thể hoàn tác.',
+  },
+  validation: {
+    nameRequired: 'Tên phòng khám không được để trống',
+    addressRequired: 'Địa chỉ không được để trống',
+    coordinatesRequired: 'Vui lòng lấy tọa độ',
+  },
+  messages: {
+    fetchSuccess: 'Tải danh sách thành công',
+    fetchError: 'Lỗi khi tải danh sách',
+    createSuccess: 'Thêm phòng khám thành công',
+    createError: 'Lỗi khi thêm phòng khám',
+    updateSuccess: 'Cập nhật phòng khám thành công',
+    updateError: 'Lỗi khi cập nhật phòng khám',
+    deleteSuccess: 'Xóa phòng khám thành công',
+    deleteError: 'Lỗi khi xóa phòng khám',
+  },
+};

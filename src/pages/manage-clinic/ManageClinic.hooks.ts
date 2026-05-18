@@ -1,20 +1,18 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from '../../libs/i18n.hooks';
-import { specialtyService } from '../../services/specialtyService';
-import type { Specialty, SpecialtyRequestPayload } from './ManageSpecialty.types';
+import { clinicService } from '../../services/clinicService';
+import type { Clinic, ClinicRequestPayload } from './ManageClinic.types';
 
-export const useManageSpecialtyHooks = () => {
-  const t = useTranslation('ManageSpecialty');
+export const useManageClinicHooks = () => {
+  const t = useTranslation('ManageClinic');
 
-  // State quản lý danh sách và phân trang
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  // State quản lý danh sách và phân trang, tìm kiếm
+  const [clinics, setClinics] = useState<Clinic[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [totalElements, setTotalElements] = useState<number>(0);
-
-  // State tìm kiếm (client-side)
   const [keyword, setKeyword] = useState<string>('');
 
   // State quản lý Modal
@@ -23,20 +21,21 @@ export const useManageSpecialtyHooks = () => {
   const [openDelete, setOpenDelete] = useState(false);
 
   // State chứa dữ liệu đang thao tác
-  const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null);
+  const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
 
-  // Fetch danh sách chuyên khoa
-  const fetchSpecialties = useCallback(async () => {
-    setLoading(true);
+  // Fetch danh sách phòng khám
+  const fetchClinics = useCallback(async () => {
     try {
-      const data = await specialtyService.getAll(page, rowsPerPage);
-      // Giả sử backend trả về ApiResponse<Page<Specialty>> => data.result.content
+      setLoading(true);
+      // We pass an empty string for keyword to fetch all for the current page
+      const data = await clinicService.getAll(page, rowsPerPage, '');
+      // Giả sử backend trả về ApiResponse<Page<Clinic>> => data.result.content
       if (data?.result) {
-        setSpecialties(data.result.content || []);
+        setClinics(data.result.content || []);
         setTotalElements(data.result.totalElements || 0);
       }
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách chuyên khoa:', error);
+      console.error('Lỗi khi lấy danh sách phòng khám:', error);
       toast.error(t('messages.fetchError'));
     } finally {
       setLoading(false);
@@ -44,8 +43,8 @@ export const useManageSpecialtyHooks = () => {
   }, [page, rowsPerPage, t]);
 
   useEffect(() => {
-    Promise.resolve().then(() => fetchSpecialties());
-  }, [page, rowsPerPage, fetchSpecialties]);
+    Promise.resolve().then(() => fetchClinics());
+  }, [fetchClinics]);
 
   // Helper to remove Vietnamese accents
   const removeAccents = (str: string) => {
@@ -56,17 +55,15 @@ export const useManageSpecialtyHooks = () => {
       .replace(/Đ/g, 'D');
   };
 
-  // Client-side filtering theo keyword
-  const filteredSpecialties = useMemo(() => {
-    if (!keyword.trim()) return specialties;
+  const filteredClinics = useMemo(() => {
+    if (!keyword.trim()) return clinics;
     const search = removeAccents(keyword.trim().toLowerCase());
-    return specialties.filter((s) => {
-      const name = removeAccents((s.specialtyName || '').toLowerCase());
+    return clinics.filter((c) => {
+      const name = removeAccents((c.clinicName || '').toLowerCase());
       return name.includes(search);
     });
-  }, [specialties, keyword]);
+  }, [clinics, keyword]);
 
-  // Search handlers
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(event.target.value);
   };
@@ -89,71 +86,70 @@ export const useManageSpecialtyHooks = () => {
   const handleOpenCreate = () => setOpenCreate(true);
   const handleCloseCreate = () => setOpenCreate(false);
 
-  const handleOpenUpdate = (specialty: Specialty) => {
-    setSelectedSpecialty(specialty);
+  const handleOpenUpdate = (clinic: Clinic) => {
+    setSelectedClinic(clinic);
     setOpenUpdate(true);
   };
   const handleCloseUpdate = () => {
-    setSelectedSpecialty(null);
+    setSelectedClinic(null);
     setOpenUpdate(false);
   };
 
-  const handleOpenDelete = (specialty: Specialty) => {
-    setSelectedSpecialty(specialty);
+  const handleOpenDelete = (clinic: Clinic) => {
+    setSelectedClinic(clinic);
     setOpenDelete(true);
   };
   const handleCloseDelete = () => {
-    setSelectedSpecialty(null);
+    setSelectedClinic(null);
     setOpenDelete(false);
   };
 
   // Thao tác Create/Update/Delete
-  const handleCreate = async (payload: SpecialtyRequestPayload) => {
+  const handleCreate = async (payload: ClinicRequestPayload) => {
     try {
-      await specialtyService.create(payload);
+      await clinicService.create(payload);
       toast.success(t('messages.createSuccess'));
       handleCloseCreate();
-      fetchSpecialties();
+      fetchClinics();
     } catch (error) {
-      console.error('Lỗi tạo chuyên khoa:', error);
+      console.error('Lỗi tạo phòng khám:', error);
       toast.error(t('messages.createError'));
     }
   };
 
-  const handleUpdate = async (payload: SpecialtyRequestPayload) => {
-    if (!selectedSpecialty) return;
+  const handleUpdate = async (payload: ClinicRequestPayload) => {
+    if (!selectedClinic) return;
     try {
-      await specialtyService.update(selectedSpecialty.id, payload);
+      await clinicService.update(selectedClinic.id, payload);
       toast.success(t('messages.updateSuccess'));
       handleCloseUpdate();
-      fetchSpecialties();
+      fetchClinics();
     } catch (error) {
-      console.error('Lỗi cập nhật chuyên khoa:', error);
+      console.error('Lỗi cập nhật phòng khám:', error);
       toast.error(t('messages.updateError'));
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedSpecialty) return;
+    if (!selectedClinic) return;
     try {
-      await specialtyService.delete(selectedSpecialty.id);
+      await clinicService.delete(selectedClinic.id);
       toast.success(t('messages.deleteSuccess'));
       handleCloseDelete();
-      // Nếu xóa item cuối cùng ở trang hiện tại, lùi lại 1 trang
-      if (specialties.length === 1 && page > 0) {
+      if (clinics.length === 1 && page > 0) {
         setPage(page - 1);
       } else {
-        fetchSpecialties();
+        fetchClinics();
       }
     } catch (error) {
-      console.error('Lỗi xóa chuyên khoa:', error);
+      console.error('Lỗi xóa phòng khám:', error);
       toast.error(t('messages.deleteError'));
     }
   };
 
   return {
     t,
-    specialties: filteredSpecialties,
+    clinics: filteredClinics,
     loading,
     page,
     rowsPerPage,
@@ -167,7 +163,7 @@ export const useManageSpecialtyHooks = () => {
     openCreate,
     openUpdate,
     openDelete,
-    selectedSpecialty,
+    selectedClinic,
     handleOpenCreate,
     handleCloseCreate,
     handleOpenUpdate,

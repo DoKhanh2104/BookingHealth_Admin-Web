@@ -1,6 +1,7 @@
 export default {
   title: 'Quản lý Chuyên khoa',
   description: 'Quản lý danh sách chuyên khoa',
+  searchPlaceholder: 'Tìm kiếm chuyên khoa...',
   columns: {
     id: 'ID',
     name: 'Tên chuyên khoa',

@@ -8,7 +8,7 @@ export default {
 
   medicalManagement: {
     specialtyManagement: 'Quản lý chuyên khoa',
-    clinicManagement: 'Quản lý cơ sở y tế',
+    clinicManagement: 'Quản lý phòng khám',
     doctorList: 'Danh sách bác sĩ',
     serviceCatalog: 'Danh mục dịch vụ',
   },
