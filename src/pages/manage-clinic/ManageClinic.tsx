@@ -104,7 +104,7 @@ const ManageClinic = () => {
         </Box>
 
         {loading && <LinearProgress />}
-        
+
         <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
@@ -121,10 +121,14 @@ const ManageClinic = () => {
                 <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2 }}>
                   {t('columns.map')}
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}
+                >
                   {t('columns.doctorCount')}
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'primary.main', py: 2, textAlign: 'center' }}
+                >
                   {t('columns.actions')}
                 </TableCell>
               </TableRow>
@@ -162,7 +166,7 @@ const ManageClinic = () => {
                           onClick={() =>
                             window.open(
                               `https://www.google.com/maps?q=${clinic.latitude},${clinic.longitude}`,
-                              '_blank'
+                              '_blank',
                             )
                           }
                         >
@@ -223,11 +227,7 @@ const ManageClinic = () => {
         />
       </Card>
 
-      <ModalCreateClinic
-        open={openCreate}
-        onClose={handleCloseCreate}
-        onConfirm={handleCreate}
-      />
+      <ModalCreateClinic open={openCreate} onClose={handleCloseCreate} onConfirm={handleCreate} />
 
       <ModalUpdateClinic
         key={selectedClinic?.id || 'update-modal'}

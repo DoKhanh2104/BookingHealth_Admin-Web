@@ -27,16 +27,13 @@ export default {
   modals: {
     detailTitle: 'Chi tiết hồ sơ bác sĩ',
     deleteTitle: 'Xác nhận xóa bác sĩ',
-    deleteContent:
-      'Bạn có chắc chắn muốn xóa bác sĩ này không? Hành động này không thể hoàn tác.',
+    deleteContent: 'Bạn có chắc chắn muốn xóa bác sĩ này không? Hành động này không thể hoàn tác.',
     approveTitle: 'Xác nhận duyệt bác sĩ',
     approveContent: 'Bạn có chắc chắn muốn duyệt xác thực cho bác sĩ này?',
     rejectTitle: 'Xác nhận từ chối bác sĩ',
-    rejectContent:
-      'Bạn có chắc chắn muốn từ chối xác thực bác sĩ này?',
+    rejectContent: 'Bạn có chắc chắn muốn từ chối xác thực bác sĩ này?',
     lockTitle: 'Xác nhận khóa tài khoản',
-    lockContent:
-      'Bạn có chắc chắn muốn khóa tài khoản bác sĩ này?',
+    lockContent: 'Bạn có chắc chắn muốn khóa tài khoản bác sĩ này?',
   },
   detail: {
     fullName: 'Họ và tên',

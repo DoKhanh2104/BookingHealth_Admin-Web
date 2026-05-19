@@ -61,14 +61,17 @@ export const useSidebarHooks = () => {
     {
       text: tSidebar('operationManagement.appointmentManagement'),
       icon: React.createElement(CalendarMonthIcon, { fontSize: 'small' }),
+      path: '/manage-appointment',
     },
     {
       text: tSidebar('operationManagement.workScheduleManagement'),
       icon: React.createElement(ScheduleIcon, { fontSize: 'small' }),
+      path: '/manage-schedule',
     },
     {
       text: tSidebar('operationManagement.patientList'),
       icon: React.createElement(AccessibleIcon, { fontSize: 'small' }),
+      path: '/manage-patient',
     },
   ];
 
@@ -81,6 +84,7 @@ export const useSidebarHooks = () => {
     {
       text: tSidebar('systemAdministration.notificationManagement'),
       icon: React.createElement(NotificationsActiveIcon, { fontSize: 'small' }),
+      path: '/manage-notification',
     },
     {
       text: tSidebar('systemAdministration.configurationManagement'),
@@ -89,6 +93,7 @@ export const useSidebarHooks = () => {
     {
       text: tSidebar('systemAdministration.reportManagement'),
       icon: React.createElement(SummarizeIcon, { fontSize: 'small' }),
+      path: '/manage-report',
     },
   ];
 
