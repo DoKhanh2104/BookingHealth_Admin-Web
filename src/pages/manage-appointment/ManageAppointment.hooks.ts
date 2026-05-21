@@ -1,62 +1,13 @@
-import { useState, useMemo, type ChangeEvent } from 'react';
+import { useState, useMemo, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
 import { type Appointment, type KpiData } from './ManageAppointment.types';
-
-// Mock Data
-const MOCK_APPOINTMENTS: Appointment[] = [
-  {
-    id: '1',
-    patientName: 'Nguyễn Văn A',
-    patientPhone: '0905123456',
-    doctorName: 'BS. Nguyễn Văn An',
-    specialty: 'Nha khoa',
-    appointmentDate: '2026-05-18',
-    timeSlot: '08:00 - 08:30',
-    totalAmount: 200000,
-    status: 'PENDING',
-  },
-  {
-    id: '2',
-    patientName: 'Trần Thị B',
-    patientPhone: '0912345678',
-    doctorName: 'BS. Lê Hoàng',
-    specialty: 'Tim mạch',
-    appointmentDate: '2026-05-18',
-    timeSlot: '09:00 - 09:30',
-    totalAmount: 500000,
-    status: 'CONFIRMED',
-  },
-  {
-    id: '3',
-    patientName: 'Lê Văn C',
-    patientPhone: '0987654321',
-    doctorName: 'BS. Trần Thị Bình',
-    specialty: 'Nội tổng quát',
-    appointmentDate: '2026-05-18',
-    timeSlot: '10:00 - 10:30',
-    totalAmount: 150000,
-    status: 'COMPLETED',
-    diagnosis: 'Viêm họng cấp',
-    prescription: 'Paracetamol 500mg x 10 viên\nVitamin C 500mg x 10 viên',
-  },
-  {
-    id: '4',
-    patientName: 'Phạm Thị D',
-    patientPhone: '0933112233',
-    doctorName: 'BS. Nguyễn Văn An',
-    specialty: 'Nha khoa',
-    appointmentDate: '2026-05-19',
-    timeSlot: '14:00 - 14:30',
-    totalAmount: 200000,
-    status: 'CANCELLED',
-  },
-];
+import { appointmentService } from '../../services/appointmentService';
 
 export const useManageAppointmentHooks = () => {
   const t = useTranslation('ManageAppointment');
 
-  const [appointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
-  const [loading] = useState(false);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -72,10 +23,27 @@ export const useManageAppointmentHooks = () => {
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
+  // Fetch appointments from API
+  const fetchAppointments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await appointmentService.getAll(0, 1000);
+      if (response?.result?.content) {
+        setAppointments(response.result.content);
+      }
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchAppointments());
+  }, [fetchAppointments]);
+
   // Computed KPI Data
   const kpiData = useMemo<KpiData>(() => {
-    // KPI based on all data or filtered data? Usually based on today's total data.
-    // For this mockup, we just use the current appointments array.
     return {
       total: appointments.length,
       pending: appointments.filter((a) => a.status === 'PENDING').length,
@@ -89,19 +57,17 @@ export const useManageAppointmentHooks = () => {
   const filteredAppointments = useMemo(() => {
     return appointments.filter((app) => {
       const matchKeyword = keyword
-        ? app.patientName.toLowerCase().includes(keyword.toLowerCase()) ||
-          app.patientPhone.includes(keyword)
+        ? (app.patientName || '').toLowerCase().includes(keyword.toLowerCase()) ||
+          (app.patientPhone || '').includes(keyword)
         : true;
       const matchDate = date ? app.appointmentDate === date : true;
       const matchStatus = status !== 'ALL' ? app.status === status : true;
 
-      // Basic mock doctor filter mapping: BS. Nguyễn Văn An -> 1, etc.
-      // In a real app, doctorId would be an ID property on the appointment.
       let matchDoctor = true;
       if (doctorId !== 'all') {
-        if (doctorId === '1') matchDoctor = app.doctorName.includes('An');
-        if (doctorId === '2') matchDoctor = app.doctorName.includes('Bình');
-        if (doctorId === '3') matchDoctor = app.doctorName.includes('Hoàng');
+        if (doctorId === '1') matchDoctor = (app.doctorName || '').includes('An');
+        if (doctorId === '2') matchDoctor = (app.doctorName || '').includes('Bình');
+        if (doctorId === '3') matchDoctor = (app.doctorName || '').includes('Hoàng');
       }
 
       return matchKeyword && matchDate && matchStatus && matchDoctor;
