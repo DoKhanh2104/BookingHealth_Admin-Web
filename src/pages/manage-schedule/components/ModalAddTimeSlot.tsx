@@ -15,28 +15,26 @@ import { Close as CloseIcon } from '@mui/icons-material';
 interface ModalAddTimeSlotProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (code: string, startTime: string, endTime: string) => boolean;
+  onAdd: (startTime: string, endTime: string) => boolean | Promise<boolean>;
   t: (key: string) => string;
 }
 
 export default function ModalAddTimeSlot({ open, onClose, onAdd, t }: ModalAddTimeSlotProps) {
-  const [code, setCode] = useState('');
   const [startTime, setStartTime] = useState('08:00');
   const [endTime, setEndTime] = useState('08:30');
   const [error, setError] = useState('');
 
   const handleClose = () => {
-    setCode('');
     setStartTime('08:00');
     setEndTime('08:30');
     setError('');
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError('');
 
-    if (!code.trim() || !startTime || !endTime) {
+    if (!startTime || !endTime) {
       setError(t('timeSlotConfig.modals.validation.required'));
       return;
     }
@@ -46,7 +44,7 @@ export default function ModalAddTimeSlot({ open, onClose, onAdd, t }: ModalAddTi
       return;
     }
 
-    const success = onAdd(code.trim(), startTime, endTime);
+    const success = await onAdd(startTime, endTime);
     if (success) {
       handleClose();
     }
@@ -91,17 +89,6 @@ export default function ModalAddTimeSlot({ open, onClose, onAdd, t }: ModalAddTi
             </Typography>
           )}
 
-          <TextField
-            label={t('timeSlotConfig.modals.code')}
-            variant="outlined"
-            fullWidth
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Ví dụ: KG09"
-            required
-            autoFocus
-          />
-
           <Box display="flex" gap={2}>
             <TextField
               label={t('timeSlotConfig.modals.startTime')}
@@ -112,6 +99,7 @@ export default function ModalAddTimeSlot({ open, onClose, onAdd, t }: ModalAddTi
               onChange={(e) => setStartTime(e.target.value)}
               InputLabelProps={{ shrink: true }}
               required
+              autoFocus
             />
             <TextField
               label={t('timeSlotConfig.modals.endTime')}

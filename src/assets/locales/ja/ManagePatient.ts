@@ -31,7 +31,7 @@ const ManagePatient = {
       total: 'Tổng lịch đặt',
       completed: 'Thành công',
       cancelled: 'Đã hủy',
-      noShow: 'Bùng hẹn (No-Show)',
+      noShow: 'Bùng hẹn',
     },
     table: {
       stt: 'STT',

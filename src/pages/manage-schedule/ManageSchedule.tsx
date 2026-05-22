@@ -596,9 +596,6 @@ export default function ManageSchedule() {
                 <Table sx={{ minWidth: 600 }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                      <TableCell sx={{ fontWeight: 600, color: 'primary.main', width: 60 }}>
-                        {t('timeSlotConfig.columns.stt')}
-                      </TableCell>
                       <TableCell sx={{ fontWeight: 600, color: 'primary.main', width: 150 }}>
                         {t('timeSlotConfig.columns.code')}
                       </TableCell>
@@ -631,9 +628,8 @@ export default function ManageSchedule() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {timeSlots.map((slot, idx) => (
+                    {timeSlots.map((slot) => (
                       <TableRow key={slot.id} hover>
-                        <TableCell>{slotPage * slotRowsPerPage + idx + 1}</TableCell>
                         <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>
                           {slot.code}
                         </TableCell>
@@ -680,7 +676,7 @@ export default function ManageSchedule() {
                     {timeSlots.length === 0 && (
                       <TableRow>
                         <TableCell
-                          colSpan={6}
+                          colSpan={5}
                           align="center"
                           sx={{ py: 3, color: 'text.secondary' }}
                         >

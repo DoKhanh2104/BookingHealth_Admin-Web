@@ -1,9 +1,18 @@
-import { useState, useMemo, useEffect, type ChangeEvent } from 'react';
+import { useState, useMemo, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
 import type { LeaveRequest, WorkSchedule, TimeSlotConfig } from './ManageSchedule.types';
 import { clinicService } from '../../services/clinicService';
 import { doctorService } from '../../services/doctorService';
+import { appointmentSlotService } from '../../services/appointmentSlotService';
 import { toast } from 'sonner';
+
+interface AxiosErrorLike {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 // Mock Data for Leave Requests
 const MOCK_LEAVE_REQUESTS: LeaveRequest[] = [
@@ -119,23 +128,6 @@ const MOCK_WORK_SCHEDULES: WorkSchedule[] = [
   },
 ];
 
-// Mock Data for Standard Time Slots (Master Data)
-const MOCK_TIME_SLOTS: TimeSlotConfig[] = [
-  { id: '1', code: 'KG01', startTime: '08:00', endTime: '08:30', isActive: true },
-  { id: '2', code: 'KG02', startTime: '08:30', endTime: '09:00', isActive: true },
-  { id: '3', code: 'KG03', startTime: '09:00', endTime: '09:30', isActive: true },
-  { id: '4', code: 'KG04', startTime: '09:30', endTime: '10:00', isActive: true },
-  { id: '5', code: 'KG05', startTime: '10:00', endTime: '10:30', isActive: true },
-  { id: '6', code: 'KG06', startTime: '10:30', endTime: '11:00', isActive: true },
-  { id: '7', code: 'KG07', startTime: '11:00', endTime: '11:30', isActive: false },
-  { id: '8', code: 'KG08', startTime: '13:30', endTime: '14:00', isActive: true },
-  { id: '9', code: 'KG09', startTime: '14:00', endTime: '14:30', isActive: true },
-  { id: '10', code: 'KG10', startTime: '14:30', endTime: '15:00', isActive: true },
-  { id: '11', code: 'KG11', startTime: '15:00', endTime: '15:30', isActive: true },
-  { id: '12', code: 'KG12', startTime: '15:30', endTime: '16:00', isActive: true },
-  { id: '13', code: 'KG13', startTime: '16:00', endTime: '16:30', isActive: true },
-];
-
 export const useManageScheduleHooks = () => {
   type ClinicModel = {
     id: number;
@@ -156,7 +148,7 @@ export const useManageScheduleHooks = () => {
   // Core Data States
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
   const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>(MOCK_WORK_SCHEDULES);
-  const [timeSlots, setTimeSlots] = useState<TimeSlotConfig[]>(MOCK_TIME_SLOTS);
+  const [timeSlots, setTimeSlots] = useState<TimeSlotConfig[]>([]);
 
   // Form / Autocomplete API states
   const [clinics, setClinics] = useState<Array<{ id: number; name: string }>>([]);
@@ -234,6 +226,50 @@ export const useManageScheduleHooks = () => {
     };
     fetchDropdownData();
   }, []);
+
+  const fetchTimeSlots = useCallback(async () => {
+    try {
+      const res = await appointmentSlotService.getAll(0, 1000);
+      const data = res?.result?.content || res?.result || res || [];
+      if (Array.isArray(data)) {
+        setTimeSlots(
+          data.map(
+            (slot: {
+              id: number;
+              code?: string;
+              startTime: string;
+              endTime: string;
+              status?: number;
+              isActive?: boolean;
+            }) => ({
+              id: String(slot.id),
+              code: slot.code || `KG${slot.id}`,
+              startTime:
+                typeof slot.startTime === 'string' && slot.startTime.length > 5
+                  ? slot.startTime.slice(0, 5)
+                  : slot.startTime,
+              endTime:
+                typeof slot.endTime === 'string' && slot.endTime.length > 5
+                  ? slot.endTime.slice(0, 5)
+                  : slot.endTime,
+              isActive: slot.status === 1 || slot.status === undefined,
+            }),
+          ),
+        );
+      } else {
+        setTimeSlots([]);
+      }
+    } catch (err) {
+      console.error('Error fetching time slots:', err);
+      setTimeSlots([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetchTimeSlots();
+    });
+  }, [fetchTimeSlots]);
 
   // --- ACTIONS FOR TAB 1: Duyệt nghỉ phép ---
   const handleApproveLeave = (id: string) => {
@@ -315,16 +351,20 @@ export const useManageScheduleHooks = () => {
   };
 
   // --- ACTIONS FOR TAB 3: Cấu hình Khung giờ ---
-  const handleToggleSlotStatus = (id: string) => {
-    setTimeSlots((prev) =>
-      prev.map((slot) => (slot.id === id ? { ...slot, isActive: !slot.isActive } : slot)),
-    );
-    toast.success(t('timeSlotConfig.messages.toggleSuccess'));
+  const handleToggleSlotStatus = async (id: string) => {
+    try {
+      await appointmentSlotService.updateStatus(Number(id));
+      toast.success(t('timeSlotConfig.messages.toggleSuccess'));
+      fetchTimeSlots();
+    } catch (err) {
+      console.error('Error toggling time slot status:', err);
+      const axiosErr = err as AxiosErrorLike;
+      toast.error(axiosErr?.response?.data?.message || 'Có lỗi xảy ra khi thay đổi trạng thái.');
+    }
   };
 
-  const handleAddTimeSlot = (code: string, startTime: string, endTime: string) => {
-    // Perform validations
-    if (!code || !startTime || !endTime) {
+  const handleAddTimeSlot = async (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) {
       toast.error(t('timeSlotConfig.modals.validation.required'));
       return false;
     }
@@ -334,23 +374,26 @@ export const useManageScheduleHooks = () => {
       return false;
     }
 
-    // Check duplicate code
-    if (timeSlots.some((slot) => slot.code.toLowerCase() === code.toLowerCase())) {
-      toast.error(t('timeSlotConfig.modals.validation.codeDuplicate'));
+    try {
+      const formattedStartTime = startTime.length === 5 ? `${startTime}:00` : startTime;
+      const formattedEndTime = endTime.length === 5 ? `${endTime}:00` : endTime;
+
+      const res = await appointmentSlotService.add(formattedStartTime, formattedEndTime);
+      if (res?.code === 200 || res?.status === 'success' || res) {
+        const code = res?.result?.code || '';
+        toast.success(t('timeSlotConfig.modals.success', { code }));
+        fetchTimeSlots();
+        return true;
+      } else {
+        toast.error(res?.message || 'Có lỗi xảy ra khi thêm khung giờ.');
+        return false;
+      }
+    } catch (err) {
+      console.error('Error adding time slot:', err);
+      const axiosErr = err as AxiosErrorLike;
+      toast.error(axiosErr?.response?.data?.message || 'Có lỗi xảy ra khi thêm khung giờ.');
       return false;
     }
-
-    const newSlot: TimeSlotConfig = {
-      id: String(timeSlots.length + 1),
-      code: code.toUpperCase(),
-      startTime,
-      endTime,
-      isActive: true,
-    };
-
-    setTimeSlots((prev) => [...prev, newSlot]);
-    toast.success(t('timeSlotConfig.modals.success', { code: newSlot.code }));
-    return true;
   };
 
   const paginatedTimeSlots = useMemo(() => {

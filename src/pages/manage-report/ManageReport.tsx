@@ -27,6 +27,8 @@ import {
   Money as MoneyIcon,
   Receipt as ReceiptIcon,
 } from '@mui/icons-material';
+import Main from '../../layouts/Main';
+import { HeaderPage } from '../../components/HeaderPage';
 import { useManageReportHooks } from './ManageReport.hooks';
 
 export default function ManageReport() {
@@ -60,21 +62,8 @@ export default function ManageReport() {
   };
 
   return (
-    <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#fcfcfd' }}>
-      {/* Premium Page Header */}
-      <Box mb={4} display="flex" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 800, color: '#1e293b', letterSpacing: '-0.02em', mb: 1 }}
-          >
-            {t('title')}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b', fontSize: 15 }}>
-            {t('description')}
-          </Typography>
-        </Box>
-      </Box>
+    <Main>
+      <HeaderPage title={t('title')} description={t('description')} />
 
       {/* 1. Master Filter Bar */}
       <Card
@@ -644,6 +633,6 @@ export default function ManageReport() {
           </Box>
         )}
       </Card>
-    </Box>
+    </Main>
   );
 }
