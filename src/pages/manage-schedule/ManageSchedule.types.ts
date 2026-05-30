@@ -26,3 +26,13 @@ export interface TimeSlotConfig {
   endTime: string; // thoiGianKetThuc
   isActive: boolean; // trangThaiDat (0/1 represented as boolean)
 }
+
+export interface BackendWorkSchedule {
+  id: number | string;
+  doctorId: number;
+  doctorName: string;
+  clinicId: number;
+  clinicName: string;
+  date: string | Date;
+  timeSlots?: string[];
+}

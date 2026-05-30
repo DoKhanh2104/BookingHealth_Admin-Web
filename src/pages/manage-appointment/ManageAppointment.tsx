@@ -36,8 +36,6 @@ const ManageAppointment = () => {
     setDate,
     status,
     setStatus,
-    doctorId,
-    setDoctorId,
     kpiData,
     handleChangePage,
     handleChangeRowsPerPage,
@@ -76,8 +74,6 @@ const ManageAppointment = () => {
             setDate={setDate}
             status={status}
             setStatus={setStatus}
-            doctorId={doctorId}
-            setDoctorId={setDoctorId}
             keyword={keyword}
             setKeyword={setKeyword}
           />

@@ -17,7 +17,6 @@ export const useManageAppointmentHooks = () => {
   const [keyword, setKeyword] = useState('');
   const [date, setDate] = useState('');
   const [status, setStatus] = useState('ALL');
-  const [doctorId, setDoctorId] = useState('all');
 
   // Modals
   const [openDetail, setOpenDetail] = useState(false);
@@ -62,17 +61,9 @@ export const useManageAppointmentHooks = () => {
         : true;
       const matchDate = date ? app.appointmentDate === date : true;
       const matchStatus = status !== 'ALL' ? app.status === status : true;
-
-      let matchDoctor = true;
-      if (doctorId !== 'all') {
-        if (doctorId === '1') matchDoctor = (app.doctorName || '').includes('An');
-        if (doctorId === '2') matchDoctor = (app.doctorName || '').includes('Bình');
-        if (doctorId === '3') matchDoctor = (app.doctorName || '').includes('Hoàng');
-      }
-
-      return matchKeyword && matchDate && matchStatus && matchDoctor;
+      return matchKeyword && matchDate && matchStatus;
     });
-  }, [appointments, keyword, date, status, doctorId]);
+  }, [appointments, keyword, date, status]);
 
   const handleKeywordChange = (val: string) => {
     setKeyword(val);
@@ -84,10 +75,6 @@ export const useManageAppointmentHooks = () => {
   };
   const handleStatusChange = (val: string) => {
     setStatus(val);
-    setPage(0);
-  };
-  const handleDoctorIdChange = (val: string) => {
-    setDoctorId(val);
     setPage(0);
   };
 
@@ -129,8 +116,6 @@ export const useManageAppointmentHooks = () => {
     setDate: handleDateChange,
     status,
     setStatus: handleStatusChange,
-    doctorId,
-    setDoctorId: handleDoctorIdChange,
     kpiData,
     handleChangePage,
     handleChangeRowsPerPage,

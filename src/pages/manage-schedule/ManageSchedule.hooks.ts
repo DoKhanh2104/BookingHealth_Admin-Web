@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
-import type { LeaveRequest, WorkSchedule, TimeSlotConfig } from './ManageSchedule.types';
+import type { LeaveRequest, WorkSchedule, TimeSlotConfig, BackendWorkSchedule } from './ManageSchedule.types';
 import { clinicService } from '../../services/clinicService';
 import { doctorService } from '../../services/doctorService';
 import { appointmentSlotService } from '../../services/appointmentSlotService';
@@ -58,76 +58,6 @@ const MOCK_LEAVE_REQUESTS: LeaveRequest[] = [
   },
 ];
 
-// Mock Data for Work Schedules (Master Schedule View-Only)
-const MOCK_WORK_SCHEDULES: WorkSchedule[] = [
-  {
-    id: 'WS001',
-    doctorId: 1,
-    doctorName: 'BS. Nguyễn Văn An',
-    clinicId: 1,
-    clinicName: 'Phòng khám Nha khoa Quốc tế',
-    date: '2026-05-18',
-    timeSlots: [
-      '08:00 - 08:30',
-      '08:30 - 09:00',
-      '09:00 - 09:30',
-      '09:30 - 10:00',
-      '10:00 - 10:30',
-      '14:00 - 14:30',
-      '14:30 - 15:00',
-    ],
-  },
-  {
-    id: 'WS002',
-    doctorId: 2,
-    doctorName: 'BS. Trần Thị Bình',
-    clinicId: 2,
-    clinicName: 'Phòng khám Tim mạch Tâm Đức',
-    date: '2026-05-18',
-    timeSlots: [
-      '08:00 - 08:30',
-      '09:00 - 09:30',
-      '10:00 - 10:30',
-      '11:00 - 11:30',
-      '15:00 - 15:30',
-      '16:00 - 16:30',
-    ],
-  },
-  {
-    id: 'WS003',
-    doctorId: 3,
-    doctorName: 'BS. Lê Hoàng',
-    clinicId: 3,
-    clinicName: 'Phòng khám đa khoa Hoàn Mỹ',
-    date: '2026-05-18',
-    timeSlots: [
-      '08:30 - 09:00',
-      '09:30 - 10:00',
-      '10:30 - 11:00',
-      '13:30 - 14:00',
-      '14:30 - 15:00',
-    ],
-  },
-  {
-    id: 'WS004',
-    doctorId: 1,
-    doctorName: 'BS. Nguyễn Văn An',
-    clinicId: 1,
-    clinicName: 'Phòng khám Nha khoa Quốc tế',
-    date: '2026-05-19',
-    timeSlots: ['08:00 - 08:30', '08:30 - 09:00', '09:00 - 09:30', '10:00 - 10:30'],
-  },
-  {
-    id: 'WS005',
-    doctorId: 2,
-    doctorName: 'BS. Trần Thị Bình',
-    clinicId: 2,
-    clinicName: 'Phòng khám Tim mạch Tâm Đức',
-    date: '2026-05-19',
-    timeSlots: ['09:00 - 09:30', '10:00 - 10:30', '14:00 - 14:30', '15:00 - 15:30'],
-  },
-];
-
 export const useManageScheduleHooks = () => {
   type ClinicModel = {
     id: number;
@@ -147,7 +77,9 @@ export const useManageScheduleHooks = () => {
 
   // Core Data States
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
-  const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>(MOCK_WORK_SCHEDULES);
+  const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>([]);
+  const [scheduleTotalElements, setScheduleTotalElements] = useState(0);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
   const [timeSlots, setTimeSlots] = useState<TimeSlotConfig[]>([]);
 
   // Form / Autocomplete API states
@@ -162,7 +94,7 @@ export const useManageScheduleHooks = () => {
   // Filters Tab 2: Theo dõi lịch làm việc
   const [scheduleClinicId, setScheduleClinicId] = useState<number | 'all'>('all');
   const [scheduleDoctorId, setScheduleDoctorId] = useState<number | 'all'>('all');
-  const [scheduleDate, setScheduleDate] = useState<string>('2026-05-18'); // Default matching mock date
+  const [scheduleDate, setScheduleDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [schedulePage, setSchedulePage] = useState(0);
   const [scheduleRowsPerPage, setScheduleRowsPerPage] = useState(5);
 
@@ -325,21 +257,52 @@ export const useManageScheduleHooks = () => {
   };
 
   // --- ACTIONS FOR TAB 2: Theo dõi lịch trực toàn sàn ---
-  const filteredWorkSchedules = useMemo(() => {
-    return workSchedules.filter((ws) => {
-      const matchClinic = scheduleClinicId === 'all' || ws.clinicId === scheduleClinicId;
-      const matchDoctor = scheduleDoctorId === 'all' || ws.doctorId === scheduleDoctorId;
-      const matchDate = !scheduleDate || ws.date === scheduleDate;
-      return matchClinic && matchDoctor && matchDate;
-    });
-  }, [workSchedules, scheduleClinicId, scheduleDoctorId, scheduleDate]);
+  const fetchWorkSchedules = useCallback(async () => {
+    if (!scheduleDate) return;
+    setScheduleLoading(true);
+    try {
+      const res = await doctorService.getWorkSchedules(
+        scheduleDate,
+        scheduleClinicId,
+        scheduleDoctorId,
+        schedulePage,
+        scheduleRowsPerPage,
+      );
+      if (res?.result?.content) {
+        setWorkSchedules(
+          res.result.content.map((ws: BackendWorkSchedule) => ({
+            id: String(ws.id),
+            doctorId: ws.doctorId,
+            doctorName: ws.doctorName,
+            clinicId: ws.clinicId,
+            clinicName: ws.clinicName,
+            date: String(ws.date),
+            timeSlots: ws.timeSlots || [],
+          })),
+        );
+        setScheduleTotalElements(res.result.totalElements || 0);
+      } else {
+        setWorkSchedules([]);
+        setScheduleTotalElements(0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch work schedules:', error);
+      setWorkSchedules([]);
+      setScheduleTotalElements(0);
+    } finally {
+      setScheduleLoading(false);
+    }
+  }, [scheduleDate, scheduleClinicId, scheduleDoctorId, schedulePage, scheduleRowsPerPage]);
 
-  const paginatedWorkSchedules = useMemo(() => {
-    return filteredWorkSchedules.slice(
-      schedulePage * scheduleRowsPerPage,
-      schedulePage * scheduleRowsPerPage + scheduleRowsPerPage,
-    );
-  }, [filteredWorkSchedules, schedulePage, scheduleRowsPerPage]);
+  useEffect(() => {
+    if (tabIndex === 1) {
+      Promise.resolve().then(() => fetchWorkSchedules());
+    }
+  }, [tabIndex, fetchWorkSchedules]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => setSchedulePage(0));
+  }, [scheduleClinicId, scheduleDoctorId, scheduleDate]);
 
   const handleChangeSchedulePage = (_event: unknown, newPage: number) => {
     setSchedulePage(newPage);
@@ -434,8 +397,9 @@ export const useManageScheduleHooks = () => {
     handleRejectLeave,
 
     // Work schedules tab
-    workSchedules: paginatedWorkSchedules,
-    scheduleTotalElements: filteredWorkSchedules.length,
+    workSchedules,
+    scheduleTotalElements,
+    scheduleLoading,
     schedulePage,
     scheduleRowsPerPage,
     scheduleClinicId,

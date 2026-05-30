@@ -15,24 +15,24 @@ export interface PageResponse<T> {
 
 export const specialtyService = {
   getAll: async (page: number = 0, size: number = 10) => {
-    const response = await apiClient.get('/admin/specialties', {
+    const response = await apiClient.get('/specialties', {
       params: { page, size },
     });
     return response.data;
   },
 
   create: async (data: SpecialtyRequestPayload) => {
-    const response = await apiClient.post('/admin/specialties', data);
+    const response = await apiClient.post('/specialties', data);
     return response.data;
   },
 
   update: async (id: number, data: SpecialtyRequestPayload) => {
-    const response = await apiClient.put(`/admin/specialties/${id}`, data);
+    const response = await apiClient.put(`/specialties/${id}`, data);
     return response.data;
   },
 
   delete: async (id: number) => {
-    const response = await apiClient.delete(`/admin/specialties/${id}`);
+    const response = await apiClient.delete(`/specialties/${id}`);
     return response.data;
   },
 };

@@ -7,8 +7,6 @@ interface Props {
   setDate: (val: string) => void;
   status: string;
   setStatus: (val: string) => void;
-  doctorId: string;
-  setDoctorId: (val: string) => void;
   keyword: string;
   setKeyword: (val: string) => void;
 }
@@ -19,18 +17,9 @@ const AppointmentFilters = ({
   setDate,
   status,
   setStatus,
-  doctorId,
-  setDoctorId,
   keyword,
   setKeyword,
 }: Props) => {
-  // Mock doctors for the dropdown
-  const mockDoctors = [
-    { id: 'all', name: t('filters.allDoctors') },
-    { id: '1', name: 'BS. Nguyễn Văn An' },
-    { id: '2', name: 'BS. Trần Thị Bình' },
-    { id: '3', name: 'BS. Lê Hoàng' },
-  ];
 
   const statuses = [
     { value: 'ALL', label: t('filters.allStatuses') },
@@ -67,20 +56,6 @@ const AppointmentFilters = ({
         ))}
       </TextField>
 
-      <TextField
-        select
-        label={t('filters.doctor')}
-        size="small"
-        value={doctorId}
-        onChange={(e) => setDoctorId(e.target.value)}
-        sx={{ minWidth: 200 }}
-      >
-        {mockDoctors.map((doc) => (
-          <MenuItem key={doc.id} value={doc.id}>
-            {doc.name}
-          </MenuItem>
-        ))}
-      </TextField>
 
       <TextField
         variant="outlined"

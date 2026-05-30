@@ -16,6 +16,7 @@ import {
   TablePagination,
   Avatar,
   InputAdornment,
+  LinearProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -75,6 +76,8 @@ export default function ManagePatient() {
     openHistory,
     selectedPatient,
     selectedPatientHistory,
+    historyLoading,
+    loading,
     handleOpenHistory,
     handleCloseHistory,
   } = useManagePatientHooks();
@@ -133,6 +136,7 @@ export default function ManagePatient() {
           </Box>
 
           {/* Patients Listing Table */}
+          {loading && <LinearProgress sx={{ mb: 2 }} />}
           <TableContainer
             component={Paper}
             sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}
@@ -276,6 +280,7 @@ export default function ManagePatient() {
         onClose={handleCloseHistory}
         patient={selectedPatient}
         appointments={selectedPatientHistory}
+        loading={historyLoading}
         t={t}
       />
     </Main>

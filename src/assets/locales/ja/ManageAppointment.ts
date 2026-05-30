@@ -27,9 +27,7 @@ export default {
   filters: {
     date: 'Chọn ngày khám',
     status: 'Chọn trạng thái',
-    doctor: 'Chọn bác sĩ',
     allStatuses: 'Tất cả trạng thái',
-    allDoctors: 'Tất cả bác sĩ',
   },
   buttons: {
     search: 'Tìm kiếm',

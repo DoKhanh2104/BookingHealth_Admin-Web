@@ -15,3 +15,27 @@ export interface PatientAppointment {
   timeSlot: string;
   status: 'COMPLETED' | 'CONFIRMED' | 'PENDING' | 'CANCELLED' | 'NO_SHOW';
 }
+
+export interface BackendPatient {
+  id: number | string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  status?: number;
+}
+
+export interface BackendAppointment {
+  id: number | string;
+  doctor?: {
+    name?: string;
+    clinic?: {
+      clinicName?: string;
+    };
+  };
+  appointmentSlot?: {
+    startTime?: string;
+    endTime?: string;
+  };
+  expectedExaminationDate?: string;
+  status: number;
+}

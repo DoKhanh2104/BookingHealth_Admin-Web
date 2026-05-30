@@ -18,6 +18,7 @@ import {
   TableBody,
   Chip,
   Paper,
+  LinearProgress,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -34,6 +35,7 @@ interface ModalPatientHistoryProps {
   patient: Patient | null;
   appointments: PatientAppointment[];
   t: (key: string, args?: object | Array<string | number>) => string;
+  loading?: boolean;
 }
 
 export default function ModalPatientHistory({
@@ -42,6 +44,7 @@ export default function ModalPatientHistory({
   patient,
   appointments,
   t,
+  loading,
 }: ModalPatientHistoryProps) {
   // Calculate statistics for bùng lịch / spam tracking
   const stats = useMemo(() => {
@@ -145,7 +148,13 @@ export default function ModalPatientHistory({
       </DialogTitle>
 
       <DialogContent dividers sx={{ px: 3, py: 2.5, borderTop: 'none', borderBottom: 'none' }}>
-        {/* Metric Cards Grid for Anti-Spam Detection */}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" py={8}>
+            <LinearProgress sx={{ width: '60%' }} />
+          </Box>
+        ) : (
+          <>
+            {/* Metric Cards Grid for Anti-Spam Detection */}
         <Grid container spacing={2} mb={3.5}>
           {/* Card 1: Total Booked */}
           <Grid item xs={6} sm={3}>
@@ -355,6 +364,8 @@ export default function ModalPatientHistory({
             </TableBody>
           </Table>
         </TableContainer>
+          </>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>

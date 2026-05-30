@@ -76,4 +76,23 @@ export const doctorService = {
     const response = await apiClient.put(`/admin/doctors/${id}/lock`);
     return response.data;
   },
+
+  getWorkSchedules: async (
+    date: string,
+    clinicId?: number | 'all',
+    doctorId?: number | 'all',
+    page: number = 0,
+    size: number = 5,
+  ) => {
+    const response = await apiClient.get('/admin/doctors/work-schedules', {
+      params: {
+        date,
+        clinicId: clinicId === 'all' ? undefined : clinicId,
+        doctorId: doctorId === 'all' ? undefined : doctorId,
+        page,
+        size,
+      },
+    });
+    return response.data;
+  },
 };

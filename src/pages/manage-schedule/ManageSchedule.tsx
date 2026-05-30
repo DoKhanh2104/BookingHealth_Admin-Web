@@ -24,6 +24,7 @@ import {
   Switch,
   Paper,
   TablePagination,
+  LinearProgress,
 } from '@mui/material';
 import {
   EventBusy as LeaveIcon,
@@ -86,6 +87,7 @@ export default function ManageSchedule() {
     // Tab 2: Work schedules
     workSchedules,
     scheduleTotalElements,
+    scheduleLoading,
     schedulePage,
     scheduleRowsPerPage,
     scheduleClinicId,
@@ -468,6 +470,7 @@ export default function ManageSchedule() {
               </Box>
 
               {/* Master Schedule Table */}
+              {scheduleLoading && <LinearProgress sx={{ mb: 2 }} />}
               <TableContainer
                 component={Paper}
                 sx={{
