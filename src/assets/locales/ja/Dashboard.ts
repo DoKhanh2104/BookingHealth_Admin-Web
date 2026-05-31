@@ -9,8 +9,8 @@ export default {
   },
   card: {
     totalBooking: 'Tổng số booking',
-    newDoctor: 'Bác sĩ mới',
-    newUser: 'Người dùng mới',
+    newDoctor: 'Tổng số bác sĩ',
+    newUser: 'Tổng số người dùng',
     revenue: 'Doanh thu',
   },
   pending: {
@@ -34,7 +34,7 @@ export default {
     uploaded: 'Đã tải lên',
   },
   bookingStatus: {
-    title: 'Trạng thái Lịch hẹn hôm nay',
+    title: 'Trạng thái lịch hẹn',
     pending: 'Chờ xác nhận',
     completed: 'Đã khám xong',
     cancelled: 'Bị hủy',

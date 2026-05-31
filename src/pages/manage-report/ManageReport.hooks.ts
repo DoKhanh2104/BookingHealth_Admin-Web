@@ -10,136 +10,6 @@ import { specialtyService } from '../../services/specialtyService';
 import { clinicService } from '../../services/clinicService';
 import { toast } from 'sonner';
 
-// High-fidelity fallback reports databases
-const MOCK_FINANCIAL: FinancialReportRow[] = [
-  {
-    appointmentId: 'LH1209',
-    patientName: 'Nguyễn Văn A',
-    doctorName: 'BS. Lê Mạnh Hùng',
-    amount: 300000,
-    paymentMethod: 'VNPAY',
-    paymentTime: '2026-05-18 09:30',
-  },
-  {
-    appointmentId: 'LH1210',
-    patientName: 'Trần Thị B',
-    doctorName: 'BS. Nguyễn Thị Mai',
-    amount: 250000,
-    paymentMethod: 'CASH',
-    paymentTime: '2026-05-18 10:15',
-  },
-  {
-    appointmentId: 'LH1211',
-    patientName: 'Lê Hoàng Long',
-    doctorName: 'BS. Phạm Gia Khiêm',
-    amount: 500000,
-    paymentMethod: 'VNPAY',
-    paymentTime: '2026-05-17 14:00',
-  },
-  {
-    appointmentId: 'LH1212',
-    patientName: 'Phạm Minh Đức',
-    doctorName: 'BS. Lê Mạnh Hùng',
-    amount: 300000,
-    paymentMethod: 'CASH',
-    paymentTime: '2026-05-16 11:20',
-  },
-  {
-    appointmentId: 'LH1213',
-    patientName: 'Vũ Thu Trang',
-    doctorName: 'BS. Nguyễn Thị Mai',
-    amount: 250000,
-    paymentMethod: 'VNPAY',
-    paymentTime: '2026-05-15 15:45',
-  },
-  {
-    appointmentId: 'LH1214',
-    patientName: 'Đặng Quốc Khánh',
-    doctorName: 'BS. Phạm Gia Khiêm',
-    amount: 500000,
-    paymentMethod: 'VNPAY',
-    paymentTime: '2026-05-14 16:30',
-  },
-];
-
-const MOCK_PERFORMANCE: PerformanceReportRow[] = [
-  {
-    id: 'P001',
-    doctorOrSpecialtyName: 'Khoa Nhi',
-    total: 45,
-    completed: 38,
-    cancelled: 7,
-    cancelRate: 15.5,
-  },
-  {
-    id: 'P002',
-    doctorOrSpecialtyName: 'Khoa Tim Mạch',
-    total: 28,
-    completed: 20,
-    cancelled: 8,
-    cancelRate: 28.6,
-  },
-  {
-    id: 'P003',
-    doctorOrSpecialtyName: 'Khoa Răng Hàm Mặt',
-    total: 60,
-    completed: 55,
-    cancelled: 5,
-    cancelRate: 8.3,
-  },
-  {
-    id: 'P004',
-    doctorOrSpecialtyName: 'BS. Lê Mạnh Hùng',
-    total: 30,
-    completed: 27,
-    cancelled: 3,
-    cancelRate: 10.0,
-  },
-  {
-    id: 'P005',
-    doctorOrSpecialtyName: 'BS. Nguyễn Thị Mai',
-    total: 42,
-    completed: 32,
-    cancelled: 10,
-    cancelRate: 23.8,
-  },
-  {
-    id: 'P006',
-    doctorOrSpecialtyName: 'BS. Phạm Gia Khiêm',
-    total: 61,
-    completed: 57,
-    cancelled: 4,
-    cancelRate: 6.6,
-  },
-];
-
-const MOCK_SATISFACTION: SatisfactionReportRow[] = [
-  {
-    id: 'S001',
-    doctorName: 'BS. Lê Mạnh Hùng',
-    specialtyName: 'Khoa Nhi',
-    totalReviews: 24,
-    averageRating: 4.8,
-    negativeReviews: 0,
-  },
-  {
-    id: 'S002',
-    doctorName: 'BS. Nguyễn Thị Mai',
-    specialtyName: 'Khoa Răng Hàm Mặt',
-    totalReviews: 18,
-    averageRating: 3.2,
-    negativeReviews: 5,
-  },
-  {
-    id: 'S003',
-    doctorName: 'BS. Phạm Gia Khiêm',
-    specialtyName: 'Khoa Tim Mạch',
-    totalReviews: 35,
-    averageRating: 4.6,
-    negativeReviews: 1,
-  },
-];
-
 export const useManageReportHooks = () => {
   const t = useTranslation('ManageReport');
 
@@ -182,16 +52,7 @@ export const useManageReportHooks = () => {
         setClinics(clinicRes.data);
       }
     } catch {
-      // Fallback fallback option list
-      setSpecialties([
-        { id: 1, name: 'Khoa Nhi' },
-        { id: 2, name: 'Khoa Tim Mạch' },
-        { id: 3, name: 'Khoa Răng Hàm Mặt' },
-      ]);
-      setClinics([
-        { id: 1, name: 'Phòng khám Đa khoa Quốc tế Quận 1' },
-        { id: 2, name: 'Phòng khám Đa khoa Quốc tế Đà Nẵng' },
-      ]);
+      console.log('Failed to fetch dropdowns');
     }
   }, []);
 
@@ -212,14 +73,14 @@ export const useManageReportHooks = () => {
         reportService.getSatisfactionReport(params),
       ]);
 
-      setFinancialData(financial.length > 0 ? financial : MOCK_FINANCIAL);
-      setPerformanceData(performance.length > 0 ? performance : MOCK_PERFORMANCE);
-      setSatisfactionData(satisfaction.length > 0 ? satisfaction : MOCK_SATISFACTION);
+      setFinancialData(financial);
+      setPerformanceData(performance);
+      setSatisfactionData(satisfaction);
     } catch {
-      // Backend offline fallback
-      setFinancialData(MOCK_FINANCIAL);
-      setPerformanceData(MOCK_PERFORMANCE);
-      setSatisfactionData(MOCK_SATISFACTION);
+      toast.error('Lỗi khi lấy dữ liệu báo cáo từ máy chủ.');
+      setFinancialData([]);
+      setPerformanceData([]);
+      setSatisfactionData([]);
     } finally {
       setLoading(false);
     }

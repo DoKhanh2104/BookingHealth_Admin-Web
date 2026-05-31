@@ -25,11 +25,10 @@ interface ModalCreateNotificationProps {
   setContent: (val: string) => void;
   type: Notification['type'];
   setType: (val: Notification['type']) => void;
-  target: Notification['target'];
-  setTarget: (val: Notification['target']) => void;
+  target: string;
+  setTarget: (val: string) => void;
   errors: { title?: string; content?: string };
   onSend: () => void;
-  onDraft: () => void;
   t: (key: string, args?: object | Array<string | number>) => string;
 }
 
@@ -46,7 +45,6 @@ export default function ModalCreateNotification({
   setTarget,
   errors,
   onSend,
-  onDraft,
   t,
 }: ModalCreateNotificationProps) {
   return (
@@ -120,11 +118,11 @@ export default function ModalCreateNotification({
                   labelId="select-type-label"
                   label={t('createModal.typeField')}
                   value={type}
-                  onChange={(e) => setType(e.target.value as Notification['type'])}
+                  onChange={(e) => setType(Number(e.target.value))}
                 >
-                  <MenuItem value="SYSTEM">{t('types.SYSTEM')}</MenuItem>
-                  <MenuItem value="PROMOTION">{t('types.PROMOTION')}</MenuItem>
-                  <MenuItem value="MAINTENANCE">{t('types.MAINTENANCE')}</MenuItem>
+                  <MenuItem value={2}>{t('types.SYSTEM')}</MenuItem>
+                  <MenuItem value={1}>{t('types.PROMOTION')}</MenuItem>
+                  <MenuItem value={3}>{t('types.MAINTENANCE')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -135,7 +133,7 @@ export default function ModalCreateNotification({
                   labelId="select-target-label"
                   label={t('createModal.targetField')}
                   value={target}
-                  onChange={(e) => setTarget(e.target.value as Notification['target'])}
+                  onChange={(e) => setTarget(e.target.value as string)}
                 >
                   <MenuItem value="ALL">{t('targets.ALL')}</MenuItem>
                   <MenuItem value="DOCTOR">{t('targets.DOCTOR')}</MenuItem>
@@ -163,14 +161,6 @@ export default function ModalCreateNotification({
           sx={{ borderRadius: 2, px: 2.5 }}
         >
           {t('createModal.btnCancel')}
-        </Button>
-        <Button
-          onClick={onDraft}
-          variant="outlined"
-          color="primary"
-          sx={{ borderRadius: 2, px: 2.5 }}
-        >
-          {t('createModal.btnDraft')}
         </Button>
         <Button
           onClick={onSend}

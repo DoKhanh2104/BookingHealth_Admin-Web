@@ -1,72 +1,19 @@
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   IconButton,
-  InputBase,
   Toolbar,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
-import {
-  Search as SearchIcon,
-  Notifications as NotificationsIcon,
-  Settings as SettingsIcon,
-  Menu as MenuIcon,
-} from '@mui/icons-material';
+import { Menu as MenuIcon } from '@mui/icons-material';
 import { DRAWER_WIDTH } from './layoutConstants';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
 }
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: 12,
-  backgroundColor: alpha(theme.palette.primary.main, 0.05),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  transition: 'all 0.3s ease',
-  [theme.breakpoints.up('sm')]: {
-    width: '350px',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: theme.palette.text.secondary,
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    // padding thêm bên trái bằng vị trí của icon Search
-    padding: theme.spacing(1.2, 1, 1.2, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    color: theme.palette.text.primary,
-    fontWeight: 500,
-    fontSize: 14,
-    '&::placeholder': {
-      color: theme.palette.text.disabled,
-    },
-  },
-}));
 
 const Header = ({ onToggleSidebar }: HeaderProps) => {
   const theme = useTheme();
@@ -106,51 +53,11 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
           </IconButton>
         )}
 
-        {/* 1. Thanh tìm kiếm — ẩn trên mobile nhỏ */}
-        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Tìm kiếm bệnh nhân, bác sĩ..."
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
-        </Box>
-
         {/* Khoảng trống đẩy các icon sang mép phải */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* 2. Cụm icon chức năng bên phải */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
-          <Tooltip title="Cài đặt">
-            <IconButton
-              size="large"
-              sx={{
-                bgcolor: 'rgba(0,0,0,0.03)',
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.08)' },
-              }}
-            >
-              <SettingsIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Thông báo">
-            <IconButton
-              size="large"
-              sx={{
-                bgcolor: 'rgba(0,0,0,0.03)',
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.08)' },
-              }}
-            >
-              <Badge badgeContent={4} color="error">
-                <NotificationsIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
-          {/* 3. Khu vực Avatar User */}
+        {/* 3. Khu vực Avatar User */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box
             sx={{
               display: 'flex',
@@ -168,14 +75,14 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
           >
             <Avatar
               alt="Admin Profile"
-              src="https://i.pravatar.cc/150?img=11"
+              src="https://ui-avatars.com/api/?name=Quốc+Khánh&background=1976d2&color=fff&size=150"
               sx={{ width: 44, height: 44, boxShadow: 1 }}
             />
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <Typography
                 sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary', lineHeight: 1.2 }}
               >
-                Q. Khanh
+                Quốc Khánh
               </Typography>
               <Typography sx={{ fontSize: 12, color: 'text.secondary', fontWeight: 500 }}>
                 Super Admin

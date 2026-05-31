@@ -1,4 +1,4 @@
-export type DoctorStatus = 'VERIFIED' | 'PENDING';
+export type DoctorStatus = 'VERIFIED' | 'PENDING' | 'LOCKED' | 'REJECTED';
 
 export interface Doctor {
   id: number;

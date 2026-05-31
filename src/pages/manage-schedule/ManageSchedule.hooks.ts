@@ -1,6 +1,11 @@
 import { useState, useMemo, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
-import type { LeaveRequest, WorkSchedule, TimeSlotConfig, BackendWorkSchedule } from './ManageSchedule.types';
+import type {
+  LeaveRequest,
+  WorkSchedule,
+  TimeSlotConfig,
+  BackendWorkSchedule,
+} from './ManageSchedule.types';
 import { clinicService } from '../../services/clinicService';
 import { doctorService } from '../../services/doctorService';
 import { appointmentSlotService } from '../../services/appointmentSlotService';

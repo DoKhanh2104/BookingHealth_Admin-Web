@@ -1,20 +1,8 @@
-import {
-  Card,
-  Typography,
-  Stack,
-  alpha,
-  Box,
-  useTheme,
-  type SxProps,
-  type Theme,
-} from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import { Card, Typography, Box, alpha, useTheme, type SxProps, type Theme } from '@mui/material';
 
 interface Props {
   title: string;
   total: number;
-  percent: number;
-  subtext: string;
   icon: React.ReactNode;
   color?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
   sx?: SxProps<Theme>;
@@ -23,17 +11,12 @@ interface Props {
 export default function AnalyticsWidgetSummary({
   title,
   total,
-  percent,
-  subtext,
   icon,
   sx,
   color = 'primary',
 }: Props) {
   const theme = useTheme();
 
-  const isPositive = percent >= 0;
-
-  // Use the provided color or fallback to primary
   const mainColor = theme.palette[color]?.main || theme.palette.primary.main;
 
   return (
@@ -78,41 +61,9 @@ export default function AnalyticsWidgetSummary({
         {total.toLocaleString()}
       </Typography>
 
-      <Typography
-        variant="subtitle2"
-        sx={{ color: theme.palette.text.secondary, fontWeight: 600, mb: 2 }}
-      >
+      <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, fontWeight: 600 }}>
         {title}
       </Typography>
-
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 'auto' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            color: isPositive ? 'success.main' : 'error.main',
-            bgcolor: isPositive
-              ? alpha(theme.palette.success.main, 0.1)
-              : alpha(theme.palette.error.main, 0.1),
-            px: 1,
-            py: 0.25,
-            borderRadius: '6px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-          }}
-        >
-          {isPositive ? (
-            <TrendingUp sx={{ fontSize: 16, mr: 0.5 }} />
-          ) : (
-            <TrendingDown sx={{ fontSize: 16, mr: 0.5 }} />
-          )}
-          {isPositive ? '+' : ''}
-          {percent}%
-        </Box>
-        <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-          {subtext}
-        </Typography>
-      </Stack>
     </Card>
   );
 }

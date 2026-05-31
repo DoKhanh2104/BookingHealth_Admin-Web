@@ -51,14 +51,13 @@ export default function ManageNotification() {
     setTarget,
     errors,
     handleSendNotification,
-    handleSaveDraft,
     handleDeleteNotification,
   } = useManageNotificationHooks();
 
   // Helper to render type chip
-  const renderTypeChip = (notifType: typeof type) => {
+  const renderTypeChip = (notifType: number) => {
     switch (notifType) {
-      case 'SYSTEM':
+      case 2: // SYSTEM
         return (
           <Chip
             label={t('types.SYSTEM')}
@@ -67,7 +66,7 @@ export default function ManageNotification() {
             sx={{ fontWeight: 600, minWidth: 80 }}
           />
         );
-      case 'PROMOTION':
+      case 1: // APPOINTMENT
         return (
           <Chip
             label={t('types.PROMOTION')}
@@ -76,7 +75,7 @@ export default function ManageNotification() {
             sx={{ fontWeight: 600, minWidth: 80 }}
           />
         );
-      case 'MAINTENANCE':
+      case 3: // REMINDER
         return (
           <Chip
             label={t('types.MAINTENANCE')}
@@ -90,50 +89,13 @@ export default function ManageNotification() {
     }
   };
 
-  // Helper to render target chip
-  const renderTargetChip = (notifTarget: typeof target) => {
-    switch (notifTarget) {
-      case 'ALL':
-        return (
-          <Chip
-            label={t('targets.ALL')}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 600 }}
-          />
-        );
-      case 'DOCTOR':
-        return (
-          <Chip
-            label={t('targets.DOCTOR')}
-            size="small"
-            color="secondary"
-            variant="outlined"
-            sx={{ fontWeight: 600 }}
-          />
-        );
-      case 'PATIENT':
-        return (
-          <Chip
-            label={t('targets.PATIENT')}
-            size="small"
-            color="warning"
-            variant="outlined"
-            sx={{ fontWeight: 600 }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   // Helper to render status chip
-  const renderStatusChip = (status: 'SENT' | 'DRAFT') => {
-    if (status === 'SENT') {
+  const renderStatusChip = (status: number) => {
+    if (status === 1) {
+      // Read
       return (
         <Chip
-          label={t('status.SENT')}
+          label="Đã đọc"
           size="small"
           sx={{
             fontWeight: 600,
@@ -143,14 +105,15 @@ export default function ManageNotification() {
         />
       );
     } else {
+      // Unread
       return (
         <Chip
-          label={t('status.DRAFT')}
+          label="Chưa đọc"
           size="small"
           sx={{
             fontWeight: 600,
-            backgroundColor: 'rgba(158, 158, 158, 0.1)',
-            color: 'text.secondary',
+            backgroundColor: 'rgba(237, 108, 2, 0.1)',
+            color: 'warning.dark',
           }}
         />
       );
@@ -202,7 +165,7 @@ export default function ManageNotification() {
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main', width: 60 }}>
                     {t('columns.stt')}
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: 'primary.main', width: 220 }}>
+                  <TableCell sx={{ fontWeight: 600, color: 'primary.main', width: 200 }}>
                     {t('columns.title')}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main', minWidth: 260 }}>
@@ -216,7 +179,7 @@ export default function ManageNotification() {
                   <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 150, textAlign: 'center' }}
                   >
-                    {t('columns.target')}
+                    Người nhận
                   </TableCell>
                   <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 140, textAlign: 'center' }}
@@ -248,9 +211,13 @@ export default function ManageNotification() {
                       {item.content.length > 90 ? `${item.content.slice(0, 90)}...` : item.content}
                     </TableCell>
                     <TableCell align="center">{renderTypeChip(item.type)}</TableCell>
-                    <TableCell align="center">{renderTargetChip(item.target)}</TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" fontWeight={500} color="text.secondary">
+                        {item.userName || 'Hệ thống'}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                      {item.createdAt}
+                      {new Date(item.createdAt).toLocaleString('vi-VN')}
                     </TableCell>
                     <TableCell align="center">{renderStatusChip(item.status)}</TableCell>
                     <TableCell align="center">
@@ -314,7 +281,6 @@ export default function ManageNotification() {
         setTarget={setTarget}
         errors={errors}
         onSend={handleSendNotification}
-        onDraft={handleSaveDraft}
         t={t}
       />
     </Main>

@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from '../../libs/i18n.hooks';
-import type { Patient, PatientAppointment, BackendPatient, BackendAppointment } from './ManagePatient.types';
+import type {
+  Patient,
+  PatientAppointment,
+  BackendPatient,
+  BackendAppointment,
+} from './ManagePatient.types';
 import { patientService } from '../../services/patientService';
 import { toast } from 'sonner';
 
@@ -62,8 +67,6 @@ export const useManagePatientHooks = () => {
     Promise.resolve().then(() => fetchPatients());
   }, [fetchPatients]);
 
-
-
   // Toggle patient lock/unlock account status on backend
   const handleToggleLock = async (id: string) => {
     const patient = patients.find((p) => p.id === id);
@@ -73,9 +76,7 @@ export const useManagePatientHooks = () => {
       const res = await patientService.toggleLock(id);
       if (res) {
         const nextStatus = patient.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
-        setPatients((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, status: nextStatus } : p)),
-        );
+        setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, status: nextStatus } : p)));
         if (nextStatus === 'LOCKED') {
           toast.success(t('messages.lockSuccess', { name: patient.fullName }));
         } else {

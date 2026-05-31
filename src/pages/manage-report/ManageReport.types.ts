@@ -1,14 +1,14 @@
 export interface FinancialReportRow {
-  appointmentId: string;
+  appointmentId: number;
   patientName: string;
   doctorName: string;
   amount: number;
-  paymentMethod: 'CASH' | 'VNPAY';
+  paymentMethod: string;
   paymentTime: string;
 }
 
 export interface PerformanceReportRow {
-  id: string;
+  id: number;
   doctorOrSpecialtyName: string;
   total: number;
   completed: number;
@@ -17,7 +17,7 @@ export interface PerformanceReportRow {
 }
 
 export interface SatisfactionReportRow {
-  id: string;
+  id: number;
   doctorName: string;
   specialtyName: string;
   totalReviews: number;

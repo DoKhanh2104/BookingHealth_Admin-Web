@@ -24,11 +24,12 @@ export const userService = {
           ...user,
           phoneNumber: user.phone,
           role: (() => {
-            const r = (user.roles?.[0]?.roleName || user.role || '').toString();
-            if (r === '1') return 'ADMIN';
-            if (r === '2') return 'USER';
-            if (r === '3') return 'DOCTOR';
-            return r || 'USER';
+            const rolesList =
+              user.roles?.map((r) => (r.roleName || '').toString().toUpperCase()) || [];
+            if (rolesList.includes('ADMIN') || rolesList.includes('1')) return 'ADMIN';
+            if (rolesList.includes('DOCTOR') || rolesList.includes('3')) return 'DOCTOR';
+            if (rolesList.includes('USER') || rolesList.includes('2')) return 'USER';
+            return user.role || 'USER';
           })(),
           status: user.status === 1 ? 'Active' : user.status === 2 ? 'Banned' : 'Inactive',
         }),

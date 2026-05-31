@@ -391,24 +391,20 @@ export default function ManageReport() {
                             </TableCell>
                             <TableCell>
                               <Chip
-                                label={t(`financial.methods.${row.paymentMethod}`)}
+                                label={row.paymentMethod}
                                 size="small"
                                 sx={{
                                   fontWeight: 700,
-                                  bgcolor:
-                                    row.paymentMethod === 'VNPAY'
-                                      ? 'rgba(26, 113, 180, 0.08)'
-                                      : 'rgba(245, 158, 11, 0.08)',
-                                  color: row.paymentMethod === 'VNPAY' ? 'primary.main' : '#d97706',
-                                  border:
-                                    row.paymentMethod === 'VNPAY'
-                                      ? '1px solid rgba(26, 113, 180, 0.15)'
-                                      : '1px solid rgba(245, 158, 11, 0.15)',
+                                  bgcolor: 'rgba(16, 185, 129, 0.08)',
+                                  color: '#10b981',
+                                  border: '1px solid rgba(16, 185, 129, 0.15)',
                                 }}
                               />
                             </TableCell>
                             <TableCell sx={{ color: '#64748b', fontSize: 13 }}>
-                              {row.paymentTime}
+                              {row.paymentTime
+                                ? new Date(row.paymentTime).toLocaleString('vi-VN')
+                                : ''}
                             </TableCell>
                           </TableRow>
                         ))

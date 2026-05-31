@@ -20,7 +20,6 @@ const AppointmentFilters = ({
   keyword,
   setKeyword,
 }: Props) => {
-
   const statuses = [
     { value: 'ALL', label: t('filters.allStatuses') },
     { value: 'PENDING', label: t('status.PENDING') },
@@ -55,7 +54,6 @@ const AppointmentFilters = ({
           </MenuItem>
         ))}
       </TextField>
-
 
       <TextField
         variant="outlined"

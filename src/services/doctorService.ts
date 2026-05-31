@@ -31,7 +31,14 @@ export const doctorService = {
           specialty: doc.specialtyName || '',
           clinicName: doc.clinicName || '',
           licenseNumber: doc.licenseNumber,
-          status: doc.status === 1 ? 'VERIFIED' : 'PENDING',
+          status:
+            doc.status === 1
+              ? 'VERIFIED'
+              : doc.status === 3
+                ? 'LOCKED'
+                : doc.status === 2
+                  ? 'REJECTED'
+                  : 'PENDING',
           email: doc.email,
           phone: doc.phoneNumber,
 
@@ -58,12 +65,15 @@ export const doctorService = {
   },
 
   approve: async (id: number) => {
-    const response = await apiClient.put(`/admin/doctors/${id}/approve`);
+    const response = await apiClient.put(`/admin/doctors/${id}/status`, { status: 1 });
     return response.data;
   },
 
   reject: async (id: number) => {
-    const response = await apiClient.put(`/admin/doctors/${id}/reject`);
+    const response = await apiClient.put(`/admin/doctors/${id}/status`, {
+      status: 2,
+      rejectReason: 'Rejected by Admin',
+    });
     return response.data;
   },
 
@@ -73,7 +83,7 @@ export const doctorService = {
   },
 
   lock: async (id: number) => {
-    const response = await apiClient.put(`/admin/doctors/${id}/lock`);
+    const response = await apiClient.put(`/admin/doctors/${id}/status`, { status: 3 });
     return response.data;
   },
 

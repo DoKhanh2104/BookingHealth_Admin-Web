@@ -16,6 +16,9 @@ import {
   InputAdornment,
   Chip,
   Avatar,
+  Select,
+  MenuItem,
+  FormControl,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -24,6 +27,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Lock as LockIcon,
+  LockOpen as LockOpenIcon,
   Verified as VerifiedIcon,
   HourglassEmpty as HourglassEmptyIcon,
 } from '@mui/icons-material';
@@ -43,6 +47,8 @@ const ManageDoctor = () => {
     rowsPerPage,
     totalElements,
     keyword,
+    statusFilter,
+    handleStatusFilterChange,
     handleSearchChange,
     handleClearSearch,
     handleChangePage,
@@ -72,8 +78,8 @@ const ManageDoctor = () => {
       <HeaderPage title={t('title')} description={t('description')} />
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', mt: 3, p: 2 }}>
-        {/* Search Bar */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}>
+        {/* Search Bar & Filter */}
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start', gap: 2 }}>
           <TextField
             variant="outlined"
             size="small"
@@ -96,6 +102,21 @@ const ManageDoctor = () => {
               ),
             }}
           />
+
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <Select value={statusFilter} onChange={handleStatusFilterChange} displayEmpty>
+              <MenuItem value="ALL">
+                {t('filter.all', { defaultValue: 'Tất cả trạng thái' })}
+              </MenuItem>
+              <MenuItem value="VERIFIED">
+                {t('filter.verified', { defaultValue: 'Đã duyệt' })}
+              </MenuItem>
+              <MenuItem value="PENDING">
+                {t('filter.pending', { defaultValue: 'Chờ duyệt' })}
+              </MenuItem>
+              <MenuItem value="LOCKED">{t('filter.locked', { defaultValue: 'Đã khóa' })}</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         {loading && <LinearProgress />}
@@ -145,7 +166,7 @@ const ManageDoctor = () => {
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
 
                   {/* Thông tin bác sĩ: Avatar + Tên + Chuyên khoa */}
-                  <TableCell>
+                  <TableCell sx={{ maxWidth: 120 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       <Avatar
                         src={doctor.avatar}
@@ -169,7 +190,14 @@ const ManageDoctor = () => {
                   </TableCell>
 
                   {/* Cơ sở công tác */}
-                  <TableCell>
+                  <TableCell
+                    sx={{
+                      maxWidth: 230,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {doctor.clinicName ? (
                       <Chip
                         label={doctor.clinicName}
@@ -220,12 +248,18 @@ const ManageDoctor = () => {
                       icon={
                         doctor.status === 'VERIFIED' ? (
                           <VerifiedIcon sx={{ fontSize: 16 }} />
+                        ) : doctor.status === 'LOCKED' ? (
+                          <LockIcon sx={{ fontSize: 16 }} />
                         ) : (
                           <HourglassEmptyIcon sx={{ fontSize: 16 }} />
                         )
                       }
                       label={
-                        doctor.status === 'VERIFIED' ? t('status.verified') : t('status.pending')
+                        doctor.status === 'VERIFIED'
+                          ? t('status.verified')
+                          : doctor.status === 'LOCKED'
+                            ? t('status.locked', { defaultValue: 'Đã khóa' })
+                            : t('status.pending')
                       }
                       size="small"
                       sx={{
@@ -234,10 +268,22 @@ const ManageDoctor = () => {
                         bgcolor:
                           doctor.status === 'VERIFIED'
                             ? 'rgba(46, 125, 50, 0.1)'
-                            : 'rgba(237, 108, 2, 0.1)',
-                        color: doctor.status === 'VERIFIED' ? '#2e7d32' : '#ed6c02',
+                            : doctor.status === 'LOCKED'
+                              ? 'rgba(211, 47, 47, 0.1)'
+                              : 'rgba(237, 108, 2, 0.1)',
+                        color:
+                          doctor.status === 'VERIFIED'
+                            ? '#2e7d32'
+                            : doctor.status === 'LOCKED'
+                              ? '#d32f2f'
+                              : '#ed6c02',
                         '& .MuiChip-icon': {
-                          color: doctor.status === 'VERIFIED' ? '#2e7d32' : '#ed6c02',
+                          color:
+                            doctor.status === 'VERIFIED'
+                              ? '#2e7d32'
+                              : doctor.status === 'LOCKED'
+                                ? '#d32f2f'
+                                : '#ed6c02',
                         },
                       }}
                     />
@@ -288,10 +334,23 @@ const ManageDoctor = () => {
                         <Tooltip title={t('buttons.lock')}>
                           <IconButton
                             size="small"
-                            color="warning"
+                            color="error"
                             onClick={() => handleOpenLock(doctor)}
                           >
                             <LockIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Mở khóa (chỉ hiện khi LOCKED) */}
+                      {doctor.status === 'LOCKED' && (
+                        <Tooltip title={t('buttons.unlock', { defaultValue: 'Mở khóa' })}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleOpenApprove(doctor)} // Dùng chung hàm duyệt để mở khóa (status 1)
+                          >
+                            <LockOpenIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}

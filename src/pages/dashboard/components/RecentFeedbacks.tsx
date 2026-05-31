@@ -11,7 +11,6 @@ import {
   Stack,
   Typography,
   Rating,
-  Button,
   useTheme,
 } from '@mui/material';
 import { getDashboardCardSx, getCardHeaderSx, titleCardSx } from './DashboardStyles';
@@ -69,17 +68,6 @@ export const RecentFeedbacks = ({ tDashboard, recentFeedbacks }: DashboardHooksT
                     >
                       "{feedback.comment}"
                     </Typography>
-                    <Stack direction="row" justifyContent="flex-end" mt={1}>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="error"
-                        disableElevation
-                        sx={{ textTransform: 'none', borderRadius: 2, px: 2 }}
-                      >
-                        {tDashboard('feedbacks.resolve')}
-                      </Button>
-                    </Stack>
                   </Stack>
                 }
               />

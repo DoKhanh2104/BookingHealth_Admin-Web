@@ -1,17 +1,18 @@
 export interface Notification {
-  id: string;
+  id: number;
   title: string;
   content: string;
-  type: 'SYSTEM' | 'PROMOTION' | 'MAINTENANCE';
-  target: 'ALL' | 'DOCTOR' | 'PATIENT';
-  status: 'SENT' | 'DRAFT';
+  type: number;
   createdAt: string;
+  status: number;
+  userId: number | null;
+  userName: string;
+  userEmail: string;
 }
 
 export interface CreateNotificationPayload {
   title: string;
   content: string;
-  type: 'SYSTEM' | 'PROMOTION' | 'MAINTENANCE';
-  target: 'ALL' | 'DOCTOR' | 'PATIENT';
-  status: 'SENT' | 'DRAFT';
+  type: number;
+  target: string;
 }

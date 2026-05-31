@@ -13,6 +13,13 @@ export default {
   status: {
     verified: 'Đã xác thực',
     pending: 'Chờ duyệt',
+    locked: 'Đã khóa',
+  },
+  filter: {
+    all: 'Tất cả trạng thái',
+    verified: 'Đã duyệt',
+    pending: 'Chờ duyệt',
+    locked: 'Đã khóa',
   },
   buttons: {
     search: 'Tìm kiếm',
@@ -21,6 +28,7 @@ export default {
     reject: 'Từ chối',
     delete: 'Xóa',
     lock: 'Khóa tài khoản',
+    unlock: 'Mở khóa',
     cancel: 'Hủy',
     close: 'Đóng',
   },

@@ -1,120 +1,193 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+import { doctorService } from '../../services/doctorService';
 import { useTranslation } from '../../libs/i18n.hooks';
+import {
+  dashboardService,
+  type RevenueFilter,
+  type DashboardSummary,
+  type RevenueChartData,
+  type BookingStatusItem,
+  type SpecialtyDistributionItem,
+  type TopDoctorItem,
+  type RecentFeedbackItem,
+  type PendingDoctorItem,
+} from '../../services/dashboardService';
+import type { Theme } from '@mui/material';
+
+// ─────────────────────────────────────────────
+// Fallback defaults (tránh crash khi data chưa về)
+// ─────────────────────────────────────────────
+
+const DEFAULT_SUMMARY: DashboardSummary = {
+  totalBookings: 0,
+  newDoctors: 0,
+  newUsers: 0,
+  totalRevenue: 0,
+};
+
+const DEFAULT_REVENUE: RevenueChartData = { labels: [], data: [] };
+const DEFAULT_BOOKING_STATUS: BookingStatusItem = { pending: 0, completed: 0, cancelled: 0 };
+
+// ─────────────────────────────────────────────
+// Hook
+// ─────────────────────────────────────────────
 
 export const useDashboardHooks = () => {
   const tDashboard = useTranslation('Dashboard');
 
-  const [revenueFilter, setRevenueFilter] = useState<'week' | 'month' | 'year'>('week');
+  // ── Filters ──────────────────────────────────────────────────────────
+  const [revenueFilter, setRevenueFilter] = useState<RevenueFilter>('week');
 
-  const getRevenueData = () => {
-    switch (revenueFilter) {
-      case 'week':
-        return {
-          labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
-          data: [1200000, 2500000, 1800000, 3200000, 2900000, 4500000, 3800000],
-        };
-      case 'month':
-        return {
-          labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
-          data: [15000000, 22000000, 18000000, 28000000],
-        };
-      case 'year':
-        return {
-          labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-          data: [
-            50000000, 48000000, 60000000, 75000000, 80000000, 95000000, 110000000, 105000000,
-            120000000, 140000000, 135000000, 150000000,
-          ],
-        };
+  // ── Loading / Error ───────────────────────────────────────────────────
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ── Data states ───────────────────────────────────────────────────────
+  const [summary, setSummary] = useState<DashboardSummary>(DEFAULT_SUMMARY);
+  const [revenueData, setRevenueData] = useState<RevenueChartData>(DEFAULT_REVENUE);
+  const [bookingStatus, setBookingStatus] = useState<BookingStatusItem>(DEFAULT_BOOKING_STATUS);
+  const [specialtyData, setSpecialtyData] = useState<SpecialtyDistributionItem[]>([]);
+  const [topDoctors, setTopDoctors] = useState<TopDoctorItem[]>([]);
+  const [recentFeedbacks, setRecentFeedbacks] = useState<RecentFeedbackItem[]>([]);
+  const [pendingDoctors, setPendingDoctors] = useState<PendingDoctorItem[]>([]);
+
+  const fetchMainData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [summaryRes, bookingStatusRes, specialtyRes, topDoctorsRes] = await Promise.all([
+        dashboardService.getSummary('month'),
+        dashboardService.getBookingStatus('month'),
+        dashboardService.getSpecialtyDistribution('month'),
+        dashboardService.getTopDoctors('month'),
+      ]);
+      setSummary(summaryRes ?? DEFAULT_SUMMARY);
+      setBookingStatus(bookingStatusRes ?? DEFAULT_BOOKING_STATUS);
+      setSpecialtyData(Array.isArray(specialtyRes) ? specialtyRes : []);
+      setTopDoctors(Array.isArray(topDoctorsRes) ? topDoctorsRes : []);
+    } catch (err) {
+      console.error('[Dashboard] fetchMainData error:', err);
+      setError('Không thể tải dữ liệu dashboard. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const revenueData = getRevenueData();
+  // ─────────────────────────────────────────────────────────────────────
+  // Fetch dữ liệu tĩnh (feedbacks, pendingDoctors) — chỉ load một lần
+  // ─────────────────────────────────────────────────────────────────────
+  const fetchStaticData = useCallback(async () => {
+    try {
+      const [feedbacksRes, pendingRes] = await Promise.all([
+        dashboardService.getRecentFeedbacks(),
+        dashboardService.getPendingDoctors(),
+      ]);
+      setRecentFeedbacks(Array.isArray(feedbacksRes) ? feedbacksRes : []);
+      setPendingDoctors(Array.isArray(pendingRes) ? pendingRes : []);
+    } catch (err) {
+      console.error('[Dashboard] fetchStaticData error:', err);
+    }
+  }, []);
 
-  const topDoctors = [
-    { name: 'BS. Nguyễn Văn A', spec: 'Tim mạch', rating: 4.9, bookings: 342, avatar: 'A' },
-    { name: 'BS. Trần Thị B', spec: 'Nhi khoa', rating: 4.8, bookings: 289, avatar: 'B' },
-    { name: 'BS. Lê C', spec: 'Nội tổng quát', rating: 4.7, bookings: 215, avatar: 'C' },
-    { name: 'BS. Phạm D', spec: 'Da liễu', rating: 4.5, bookings: 198, avatar: 'D' },
-    { name: 'BS. Hoàng E', spec: 'Tai Mũi Họng', rating: 4.5, bookings: 156, avatar: 'E' },
-  ];
+  // ─────────────────────────────────────────────────────────────────────
+  // Fetch doanh thu — phụ thuộc revenueFilter
+  // ─────────────────────────────────────────────────────────────────────
+  const fetchRevenueData = useCallback(async (filter: RevenueFilter) => {
+    try {
+      const res = await dashboardService.getRevenueChart(filter);
+      setRevenueData(res ?? DEFAULT_REVENUE);
+    } catch (err) {
+      console.error('[Dashboard] fetchRevenueData error:', err);
+    }
+  }, []);
 
-  const specialtyData = [
-    { category: 'Nhi khoa', value: 140 },
-    { category: 'Nội tổng quát', value: 200 },
-    { category: 'Da liễu', value: 85 },
-    { category: 'Tim mạch', value: 65 },
-  ];
+  useEffect(() => {
+    Promise.resolve().then(() => fetchMainData());
+  }, [fetchMainData]);
 
-  const bookingStatusData = (theme: import('@mui/material').Theme) => [
+  useEffect(() => {
+    Promise.resolve().then(() => fetchRevenueData(revenueFilter));
+  }, [revenueFilter, fetchRevenueData]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchStaticData());
+  }, [fetchStaticData]);
+
+  /** Dữ liệu pie chart booking status — nhận theme để lấy màu */
+  const bookingStatusData = (theme: Theme) => [
     {
       id: 0,
-      value: 45,
+      value: bookingStatus.pending,
       label: tDashboard('bookingStatus.pending'),
       color: theme.palette.warning.main,
     },
     {
       id: 1,
-      value: 120,
+      value: bookingStatus.completed,
       label: tDashboard('bookingStatus.completed'),
       color: theme.palette.success.main,
     },
     {
       id: 2,
-      value: 15,
+      value: bookingStatus.cancelled,
       label: tDashboard('bookingStatus.cancelled'),
       color: theme.palette.error.main,
     },
   ];
 
-  const pendingDoctors = [
-    {
-      id: 1,
-      name: 'BS. Nguyễn Văn A',
-      spec: 'Tim mạch',
-      date: '28/04/2026',
-      certStatus: tDashboard('status.uploaded'),
-    },
-    {
-      id: 2,
-      name: 'BS. Trần Thị B',
-      spec: 'Nhi khoa',
-      date: '27/04/2026',
-      certStatus: tDashboard('status.uploaded'),
-    },
-  ];
+  const isPendingActionEmpty = pendingDoctors.length === 0;
 
-  const recentFeedbacks = [
-    {
-      id: 1,
-      patientName: 'Lê Văn Khách',
-      doctorName: 'BS. Nguyễn Văn A',
-      rating: 1,
-      comment: 'Bác sĩ khám qua loa, thái độ không tốt.',
-      date: '10 phút trước',
-    },
-    {
-      id: 2,
-      patientName: 'Trần Thị Bệnh',
-      doctorName: 'BS. Phạm D',
-      rating: 2,
-      comment: 'Đợi quá lâu dù đã đặt lịch trước.',
-      date: '1 giờ trước',
-    },
-  ];
+  const handleApprovePendingDoctor = async (id: number) => {
+    try {
+      await doctorService.approve(id);
+      toast.success('Duyệt bác sĩ thành công');
+      fetchStaticData();
+      fetchMainData();
+    } catch (error) {
+      console.error('Lỗi duyệt bác sĩ:', error);
+      toast.error('Lỗi khi duyệt bác sĩ');
+    }
+  };
 
-  const isPendingActionEmpty = false;
+  const handleRejectPendingDoctor = async (id: number) => {
+    try {
+      await doctorService.reject(id);
+      toast.success('Từ chối bác sĩ thành công');
+      fetchStaticData();
+      fetchMainData();
+    } catch (error) {
+      console.error('Lỗi từ chối bác sĩ:', error);
+      toast.error('Lỗi khi từ chối bác sĩ');
+    }
+  };
 
   return {
+    // translations
     tDashboard,
+
+    // filters
     revenueFilter,
     setRevenueFilter,
+
+    // loading / error
+    loading,
+    error,
+
+    // summary stats
+    summary,
+
+    // chart data
     revenueData,
-    topDoctors,
-    specialtyData,
     bookingStatusData,
-    pendingDoctors,
+    specialtyData,
+
+    // list data
+    topDoctors,
     recentFeedbacks,
+    pendingDoctors,
     isPendingActionEmpty,
+    handleApprovePendingDoctor,
+    handleRejectPendingDoctor,
   };
 };

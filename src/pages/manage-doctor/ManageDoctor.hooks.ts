@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useTranslation } from '../../libs/i18n.hooks';
 import { doctorService } from '../../services/doctorService';
 import type { Doctor } from './ManageDoctor.types';
+import { type SelectChangeEvent } from '@mui/material';
 
 export const useManageDoctorHooks = () => {
   const t = useTranslation('ManageDoctor');
@@ -14,6 +15,8 @@ export const useManageDoctorHooks = () => {
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [totalElements, setTotalElements] = useState<number>(0);
   const [keyword, setKeyword] = useState<string>('');
+
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   // State quản lý Modal
   const [openDetail, setOpenDetail] = useState(false);
@@ -29,7 +32,17 @@ export const useManageDoctorHooks = () => {
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await doctorService.getAll(page, rowsPerPage, '');
+      const statusValue =
+        statusFilter === 'VERIFIED'
+          ? 1
+          : statusFilter === 'PENDING'
+            ? 0
+            : statusFilter === 'LOCKED'
+              ? 3
+              : statusFilter === 'REJECTED'
+                ? 2
+                : undefined;
+      const data = await doctorService.getAll(page, rowsPerPage, keyword, statusValue);
       if (data?.result) {
         setDoctors(data.result.content || []);
         setTotalElements(data.result.totalElements || 0);
@@ -40,10 +53,10 @@ export const useManageDoctorHooks = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, t]);
+  }, [page, rowsPerPage, statusFilter, keyword, t]);
 
   useEffect(() => {
-    Promise.resolve().then(() => fetchDoctors());
+    Promise.resolve().then(fetchDoctors);
   }, [fetchDoctors]);
 
   // Search handlers
@@ -67,10 +80,12 @@ export const useManageDoctorHooks = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(event.target.value);
+    setPage(0);
   };
 
   const handleClearSearch = () => {
     setKeyword('');
+    setPage(0);
   };
 
   // Phân trang
@@ -186,6 +201,11 @@ export const useManageDoctorHooks = () => {
     }
   };
 
+  const handleStatusFilterChange = (event: SelectChangeEvent<string>) => {
+    setStatusFilter(event.target.value);
+    setPage(0);
+  };
+
   return {
     t,
     doctors: filteredDoctors,
@@ -194,6 +214,8 @@ export const useManageDoctorHooks = () => {
     rowsPerPage,
     totalElements,
     keyword,
+    statusFilter,
+    handleStatusFilterChange,
     handleSearchChange,
     handleClearSearch,
     handleChangePage,

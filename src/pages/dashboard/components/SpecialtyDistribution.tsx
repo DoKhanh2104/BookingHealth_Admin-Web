@@ -29,7 +29,7 @@ export const SpecialtyDistribution = ({ tDashboard, specialtyData }: DashboardHo
           sx={{ width: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}
         >
           <BarChart
-            dataset={specialtyData}
+            dataset={specialtyData as unknown as Record<string, unknown>[]}
             xAxis={[{ scaleType: 'band', dataKey: 'category' }]}
             series={[
               {
