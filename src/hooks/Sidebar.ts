@@ -6,13 +6,13 @@ import {
   Category as CategoryIcon,
   LocalHospital as LocalHospitalIcon,
   People as PeopleIcon,
-  HomeRepairService as HomeRepairServiceIcon,
+  // HomeRepairService as HomeRepairServiceIcon,
   CalendarMonth as CalendarMonthIcon,
   Schedule as ScheduleIcon,
   Accessible as AccessibleIcon,
   Games as GamesIcon,
   NotificationsActive as NotificationsActiveIcon,
-  AppSettingsAlt as AppSettingsAltIcon,
+  // AppSettingsAlt as AppSettingsAltIcon,
   Summarize as SummarizeIcon,
 } from '@mui/icons-material';
 
@@ -51,10 +51,10 @@ export const useSidebarHooks = () => {
       icon: React.createElement(PeopleIcon, { fontSize: 'small' }),
       path: '/manage-doctor',
     },
-    {
-      text: tSidebar('medicalManagement.serviceCatalog'),
-      icon: React.createElement(HomeRepairServiceIcon, { fontSize: 'small' }),
-    },
+    // {
+    //   text: tSidebar('medicalManagement.serviceCatalog'),
+    //   icon: React.createElement(HomeRepairServiceIcon, { fontSize: 'small' }),
+    // },
   ];
 
   const operationMenuItems: NavMenuItem[] = [
@@ -86,10 +86,10 @@ export const useSidebarHooks = () => {
       icon: React.createElement(NotificationsActiveIcon, { fontSize: 'small' }),
       path: '/manage-notification',
     },
-    {
-      text: tSidebar('systemAdministration.configurationManagement'),
-      icon: React.createElement(AppSettingsAltIcon, { fontSize: 'small' }),
-    },
+    // {
+    //   text: tSidebar('systemAdministration.configurationManagement'),
+    //   icon: React.createElement(AppSettingsAltIcon, { fontSize: 'small' }),
+    // },
     {
       text: tSidebar('systemAdministration.reportManagement'),
       icon: React.createElement(SummarizeIcon, { fontSize: 'small' }),

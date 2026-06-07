@@ -65,6 +65,9 @@ const ManageReport = {
     exportSuccess: 'Xuất tệp báo cáo Excel doanh thu thành công.',
     exportError: 'Không thể xuất tệp báo cáo Excel. Vui lòng thử lại sau.',
   },
+  pagination: {
+    rowsPerPage: 'Số hàng mỗi trang:',
+  },
 };
 
 export default ManageReport;

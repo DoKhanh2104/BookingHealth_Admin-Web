@@ -90,35 +90,35 @@ export default function ManageNotification() {
   };
 
   // Helper to render status chip
-  const renderStatusChip = (status: number) => {
-    if (status === 1) {
-      // Read
-      return (
-        <Chip
-          label="Đã đọc"
-          size="small"
-          sx={{
-            fontWeight: 600,
-            backgroundColor: 'rgba(46, 125, 50, 0.1)',
-            color: 'success.dark',
-          }}
-        />
-      );
-    } else {
-      // Unread
-      return (
-        <Chip
-          label="Chưa đọc"
-          size="small"
-          sx={{
-            fontWeight: 600,
-            backgroundColor: 'rgba(237, 108, 2, 0.1)',
-            color: 'warning.dark',
-          }}
-        />
-      );
-    }
-  };
+  // const renderStatusChip = (status: number) => {
+  //   if (status === 1) {
+  //     // Read
+  //     return (
+  //       <Chip
+  //         label="Đã đọc"
+  //         size="small"
+  //         sx={{
+  //           fontWeight: 600,
+  //           backgroundColor: 'rgba(46, 125, 50, 0.1)',
+  //           color: 'success.dark',
+  //         }}
+  //       />
+  //     );
+  //   } else {
+  //     // Unread
+  //     return (
+  //       <Chip
+  //         label="Chưa đọc"
+  //         size="small"
+  //         sx={{
+  //           fontWeight: 600,
+  //           backgroundColor: 'rgba(237, 108, 2, 0.1)',
+  //           color: 'warning.dark',
+  //         }}
+  //       />
+  //     );
+  //   }
+  // };
 
   return (
     <Main>
@@ -176,21 +176,21 @@ export default function ManageNotification() {
                   >
                     {t('columns.type')}
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 150, textAlign: 'center' }}
                   >
                     Người nhận
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 140, textAlign: 'center' }}
                   >
                     {t('columns.createdAt')}
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 110, textAlign: 'center' }}
                   >
                     {t('columns.status')}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell
                     sx={{ fontWeight: 600, color: 'primary.main', width: 80, textAlign: 'center' }}
                   >
@@ -211,15 +211,15 @@ export default function ManageNotification() {
                       {item.content.length > 90 ? `${item.content.slice(0, 90)}...` : item.content}
                     </TableCell>
                     <TableCell align="center">{renderTypeChip(item.type)}</TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <Typography variant="body2" fontWeight={500} color="text.secondary">
                         {item.userName || 'Hệ thống'}
                       </Typography>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell align="center" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
                       {new Date(item.createdAt).toLocaleString('vi-VN')}
                     </TableCell>
-                    <TableCell align="center">{renderStatusChip(item.status)}</TableCell>
+                    {/* <TableCell align="center">{renderStatusChip(item.status)}</TableCell> */}
                     <TableCell align="center">
                       <Tooltip title={t('tooltips.delete')}>
                         <IconButton

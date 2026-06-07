@@ -6,8 +6,6 @@ import type {
   SatisfactionReportRow,
 } from './ManageReport.types';
 import { reportService } from '../../services/reportService';
-import { specialtyService } from '../../services/specialtyService';
-import { clinicService } from '../../services/clinicService';
 import { toast } from 'sonner';
 
 export const useManageReportHooks = () => {
@@ -21,8 +19,6 @@ export const useManageReportHooks = () => {
   const [toDate, setToDate] = useState(() => {
     return new Date().toISOString().split('T')[0];
   });
-  const [specialtyId, setSpecialtyId] = useState<string | number>('all');
-  const [clinicId, setClinicId] = useState<string | number>('all');
 
   // Active Tab state
   const [tabValue, setTabValue] = useState<'financial' | 'performance' | 'satisfaction'>(
@@ -34,27 +30,17 @@ export const useManageReportHooks = () => {
   const [performanceData, setPerformanceData] = useState<PerformanceReportRow[]>([]);
   const [satisfactionData, setSatisfactionData] = useState<SatisfactionReportRow[]>([]);
 
+  // Pagination states
+  const [financialPage, setFinancialPage] = useState(0);
+  const [financialRowsPerPage, setFinancialRowsPerPage] = useState(10);
+
+  const [performancePage, setPerformancePage] = useState(0);
+  const [performanceRowsPerPage, setPerformanceRowsPerPage] = useState(10);
+
+  const [satisfactionPage, setSatisfactionPage] = useState(0);
+  const [satisfactionRowsPerPage, setSatisfactionRowsPerPage] = useState(10);
+
   const [loading, setLoading] = useState(false);
-
-  // Dropdown lists
-  const [specialties, setSpecialties] = useState<{ id: number | string; name: string }[]>([]);
-  const [clinics, setClinics] = useState<{ id: number | string; name: string }[]>([]);
-
-  // Fetch filter dropdown options
-  const fetchDropdowns = useCallback(async () => {
-    try {
-      const specialtyRes = await specialtyService.getAll(0, 100);
-      if (specialtyRes && specialtyRes.data) {
-        setSpecialties(specialtyRes.data);
-      }
-      const clinicRes = await clinicService.getAll(0, 100, '');
-      if (clinicRes && clinicRes.data) {
-        setClinics(clinicRes.data);
-      }
-    } catch {
-      console.log('Failed to fetch dropdowns');
-    }
-  }, []);
 
   // Main data fetcher
   const fetchReportData = useCallback(async () => {
@@ -62,8 +48,6 @@ export const useManageReportHooks = () => {
     const params = {
       fromDate,
       toDate,
-      specialtyId: specialtyId === 'all' ? undefined : specialtyId,
-      clinicId: clinicId === 'all' ? undefined : clinicId,
     };
 
     try {
@@ -84,11 +68,7 @@ export const useManageReportHooks = () => {
     } finally {
       setLoading(false);
     }
-  }, [fromDate, toDate, specialtyId, clinicId]);
-
-  useEffect(() => {
-    Promise.resolve().then(() => fetchDropdowns());
-  }, [fetchDropdowns]);
+  }, [fromDate, toDate]);
 
   useEffect(() => {
     Promise.resolve().then(() => fetchReportData());
@@ -108,8 +88,6 @@ export const useManageReportHooks = () => {
       const blob = await reportService.exportRevenueExcel({
         fromDate,
         toDate,
-        specialtyId: specialtyId === 'all' ? undefined : specialtyId,
-        clinicId: clinicId === 'all' ? undefined : clinicId,
       });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -165,25 +143,56 @@ export const useManageReportHooks = () => {
     return { totalRevenue, totalTransactions, avgValue };
   }, [financialData]);
 
+  // Pagination Handlers
+  const handleChangeFinancialPage = (_event: unknown, newPage: number) => {
+    setFinancialPage(newPage);
+  };
+  const handleChangeFinancialRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFinancialRowsPerPage(parseInt(event.target.value, 10));
+    setFinancialPage(0);
+  };
+
+  const handleChangePerformancePage = (_event: unknown, newPage: number) => {
+    setPerformancePage(newPage);
+  };
+  const handleChangePerformanceRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPerformanceRowsPerPage(parseInt(event.target.value, 10));
+    setPerformancePage(0);
+  };
+
+  const handleChangeSatisfactionPage = (_event: unknown, newPage: number) => {
+    setSatisfactionPage(newPage);
+  };
+  const handleChangeSatisfactionRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSatisfactionRowsPerPage(parseInt(event.target.value, 10));
+    setSatisfactionPage(0);
+  };
+
   return {
     t,
     fromDate,
     setFromDate,
     toDate,
     setToDate,
-    specialtyId,
-    setSpecialtyId,
-    clinicId,
-    setClinicId,
     tabValue,
     handleTabChange,
     loading,
-    specialties,
-    clinics,
     financialData,
     performanceData,
     satisfactionData,
     handleExportExcel,
     financialMetrics,
+    financialPage,
+    financialRowsPerPage,
+    handleChangeFinancialPage,
+    handleChangeFinancialRowsPerPage,
+    performancePage,
+    performanceRowsPerPage,
+    handleChangePerformancePage,
+    handleChangePerformanceRowsPerPage,
+    satisfactionPage,
+    satisfactionRowsPerPage,
+    handleChangeSatisfactionPage,
+    handleChangeSatisfactionRowsPerPage,
   };
 };

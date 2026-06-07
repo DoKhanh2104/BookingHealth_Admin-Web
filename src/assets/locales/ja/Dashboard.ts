@@ -11,7 +11,7 @@ export default {
     totalBooking: 'Tổng số booking',
     newDoctor: 'Tổng số bác sĩ',
     newUser: 'Tổng số người dùng',
-    revenue: 'Doanh thu',
+    revenue: 'Doanh thu (VND)',
   },
   pending: {
     title: 'Danh sách chờ xử lý',

@@ -1,5 +1,5 @@
 export interface LeaveRequest {
-  id: string;
+  id: number;
   doctorId: number;
   doctorName: string;
   clinicName: string;

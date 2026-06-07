@@ -6,7 +6,6 @@ import {
   Tabs,
   Tab,
   TextField,
-  MenuItem,
   Button,
   Table,
   TableBody,
@@ -17,6 +16,7 @@ import {
   Paper,
   Chip,
   CircularProgress,
+  TablePagination,
 } from '@mui/material';
 import {
   Download as DownloadIcon,
@@ -38,20 +38,26 @@ export default function ManageReport() {
     setFromDate,
     toDate,
     setToDate,
-    specialtyId,
-    setSpecialtyId,
-    clinicId,
-    setClinicId,
     tabValue,
     handleTabChange,
     loading,
-    specialties,
-    clinics,
     financialData,
     performanceData,
     satisfactionData,
     handleExportExcel,
     financialMetrics,
+    financialPage,
+    financialRowsPerPage,
+    handleChangeFinancialPage,
+    handleChangeFinancialRowsPerPage,
+    performancePage,
+    performanceRowsPerPage,
+    handleChangePerformancePage,
+    handleChangePerformanceRowsPerPage,
+    satisfactionPage,
+    satisfactionRowsPerPage,
+    handleChangeSatisfactionPage,
+    handleChangeSatisfactionRowsPerPage,
   } = useManageReportHooks();
 
   const formatCurrency = (value: number) => {
@@ -90,7 +96,7 @@ export default function ManageReport() {
           {t('filters.title')}
         </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={6}>
             <TextField
               label={t('filters.fromDate')}
               type="date"
@@ -101,7 +107,7 @@ export default function ManageReport() {
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={6}>
             <TextField
               label={t('filters.toDate')}
               type="date"
@@ -111,40 +117,6 @@ export default function ManageReport() {
               InputLabelProps={{ shrink: true }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              select
-              label={t('filters.specialty')}
-              fullWidth
-              value={specialtyId}
-              onChange={(e) => setSpecialtyId(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
-            >
-              <MenuItem value="all">{t('filters.allSpecialties')}</MenuItem>
-              {specialties.map((spec) => (
-                <MenuItem key={spec.id} value={spec.id}>
-                  {spec.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              select
-              label={t('filters.clinic')}
-              fullWidth
-              value={clinicId}
-              onChange={(e) => setClinicId(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
-            >
-              <MenuItem value="all">{t('filters.allClinics')}</MenuItem>
-              {clinics.map((cli) => (
-                <MenuItem key={cli.id} value={cli.id}>
-                  {cli.name}
-                </MenuItem>
-              ))}
-            </TextField>
           </Grid>
         </Grid>
       </Card>
@@ -368,50 +340,64 @@ export default function ManageReport() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        financialData.map((row, index) => (
-                          <TableRow
-                            key={row.appointmentId}
-                            hover
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                          >
-                            <TableCell align="center" sx={{ color: '#64748b', fontWeight: 500 }}>
-                              {index + 1}
-                            </TableCell>
-                            <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
-                              {row.appointmentId}
-                            </TableCell>
-                            <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
-                              {row.patientName}
-                            </TableCell>
-                            <TableCell sx={{ color: '#475569', fontWeight: 500 }}>
-                              {row.doctorName}
-                            </TableCell>
-                            <TableCell sx={{ color: 'primary.main', fontWeight: 700 }}>
-                              {formatCurrency(row.amount)}
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={row.paymentMethod}
-                                size="small"
-                                sx={{
-                                  fontWeight: 700,
-                                  bgcolor: 'rgba(16, 185, 129, 0.08)',
-                                  color: '#10b981',
-                                  border: '1px solid rgba(16, 185, 129, 0.15)',
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell sx={{ color: '#64748b', fontSize: 13 }}>
-                              {row.paymentTime
-                                ? new Date(row.paymentTime).toLocaleString('vi-VN')
-                                : ''}
-                            </TableCell>
-                          </TableRow>
-                        ))
+                        financialData
+                          .slice(
+                            financialPage * financialRowsPerPage,
+                            financialPage * financialRowsPerPage + financialRowsPerPage,
+                          )
+                          .map((row, index) => (
+                            <TableRow
+                              key={row.appointmentId}
+                              hover
+                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                              <TableCell align="center" sx={{ color: '#64748b', fontWeight: 500 }}>
+                                {financialPage * financialRowsPerPage + index + 1}
+                              </TableCell>
+                              <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
+                                {row.appointmentId}
+                              </TableCell>
+                              <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
+                                {row.patientName}
+                              </TableCell>
+                              <TableCell sx={{ color: '#475569', fontWeight: 500 }}>
+                                {row.doctorName}
+                              </TableCell>
+                              <TableCell sx={{ color: 'primary.main', fontWeight: 700 }}>
+                                {formatCurrency(row.amount)}
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={row.paymentMethod}
+                                  size="small"
+                                  sx={{
+                                    fontWeight: 700,
+                                    bgcolor: 'rgba(16, 185, 129, 0.08)',
+                                    color: '#10b981',
+                                    border: '1px solid rgba(16, 185, 129, 0.15)',
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell sx={{ color: '#64748b', fontSize: 13 }}>
+                                {row.paymentTime
+                                  ? new Date(row.paymentTime).toLocaleString('vi-VN')
+                                  : ''}
+                              </TableCell>
+                            </TableRow>
+                          ))
                       )}
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={financialData.length}
+                  page={financialPage}
+                  onPageChange={handleChangeFinancialPage}
+                  rowsPerPage={financialRowsPerPage}
+                  onRowsPerPageChange={handleChangeFinancialRowsPerPage}
+                  labelRowsPerPage={t('pagination.rowsPerPage') || 'Số hàng mỗi trang:'}
+                />
               </Box>
             )}
 
@@ -457,67 +443,84 @@ export default function ManageReport() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        performanceData.map((row, index) => {
-                          const isHighCancelRate = row.cancelRate > 20;
-                          return (
-                            <TableRow
-                              key={row.id}
-                              hover
-                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                              <TableCell align="center" sx={{ color: '#64748b', fontWeight: 500 }}>
-                                {index + 1}
-                              </TableCell>
-                              <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
-                                {row.doctorOrSpecialtyName}
-                              </TableCell>
-                              <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
-                                {row.total}
-                              </TableCell>
-                              <TableCell sx={{ color: '#10b981', fontWeight: 600 }}>
-                                {row.completed}
-                              </TableCell>
-                              <TableCell sx={{ color: '#ef4444', fontWeight: 600 }}>
-                                {row.cancelled}
-                              </TableCell>
-                              <TableCell>
-                                <Box display="flex" alignItems="center" gap={1.5}>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      fontWeight: 800,
-                                      color: isHighCancelRate ? '#ef4444' : '#475569',
-                                    }}
-                                  >
-                                    {row.cancelRate}%
-                                  </Typography>
-                                  {isHighCancelRate && (
-                                    <Chip
-                                      icon={
-                                        <EventBusyIcon
-                                          sx={{ '&&': { color: '#ef4444', fontSize: 13 } }}
-                                        />
-                                      }
-                                      label={t('performance.warning')}
-                                      size="small"
+                        performanceData
+                          .slice(
+                            performancePage * performanceRowsPerPage,
+                            performancePage * performanceRowsPerPage + performanceRowsPerPage,
+                          )
+                          .map((row, index) => {
+                            const isHighCancelRate = row.cancelRate > 20;
+                            return (
+                              <TableRow
+                                key={row.id}
+                                hover
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                              >
+                                <TableCell
+                                  align="center"
+                                  sx={{ color: '#64748b', fontWeight: 500 }}
+                                >
+                                  {performancePage * performanceRowsPerPage + index + 1}
+                                </TableCell>
+                                <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
+                                  {row.doctorOrSpecialtyName}
+                                </TableCell>
+                                <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
+                                  {row.total}
+                                </TableCell>
+                                <TableCell sx={{ color: '#10b981', fontWeight: 600 }}>
+                                  {row.completed}
+                                </TableCell>
+                                <TableCell sx={{ color: '#ef4444', fontWeight: 600 }}>
+                                  {row.cancelled}
+                                </TableCell>
+                                <TableCell>
+                                  <Box display="flex" alignItems="center" gap={1.5}>
+                                    <Typography
+                                      variant="body2"
                                       sx={{
-                                        fontWeight: 700,
-                                        bgcolor: 'rgba(239, 68, 68, 0.08)',
-                                        color: '#ef4444',
-                                        border: '1px solid rgba(239, 68, 68, 0.15)',
-                                        fontSize: 11,
+                                        fontWeight: 800,
+                                        color: isHighCancelRate ? '#ef4444' : '#475569',
                                       }}
-                                    />
-                                  )}
-                                </Box>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
+                                    >
+                                      {row.cancelRate}%
+                                    </Typography>
+                                    {isHighCancelRate && (
+                                      <Chip
+                                        icon={
+                                          <EventBusyIcon
+                                            sx={{ '&&': { color: '#ef4444', fontSize: 13 } }}
+                                          />
+                                        }
+                                        label={t('performance.warning')}
+                                        size="small"
+                                        sx={{
+                                          fontWeight: 700,
+                                          bgcolor: 'rgba(239, 68, 68, 0.08)',
+                                          color: '#ef4444',
+                                          border: '1px solid rgba(239, 68, 68, 0.15)',
+                                          fontSize: 11,
+                                        }}
+                                      />
+                                    )}
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
                       )}
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={performanceData.length}
+                  page={performancePage}
+                  onPageChange={handleChangePerformancePage}
+                  rowsPerPage={performanceRowsPerPage}
+                  onRowsPerPageChange={handleChangePerformanceRowsPerPage}
+                  labelRowsPerPage={t('pagination.rowsPerPage') || 'Số hàng mỗi trang:'}
+                />
               </Box>
             )}
 
@@ -563,67 +566,88 @@ export default function ManageReport() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        satisfactionData.map((row, index) => {
-                          const isLowSatisfaction = row.averageRating < 3.5;
-                          return (
-                            <TableRow
-                              key={row.id}
-                              hover
-                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                              <TableCell align="center" sx={{ color: '#64748b', fontWeight: 500 }}>
-                                {index + 1}
-                              </TableCell>
-                              <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
-                                {row.doctorName}
-                              </TableCell>
-                              <TableCell sx={{ color: '#475569', fontWeight: 500 }}>
-                                {row.specialtyName}
-                              </TableCell>
-                              <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
-                                {row.totalReviews}
-                              </TableCell>
-                              <TableCell>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                  <Box display="flex" alignItems="center" sx={{ color: '#f59e0b' }}>
-                                    <StarIcon fontSize="small" />
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ ml: 0.5, fontWeight: 800, color: '#1e293b' }}
-                                    >
-                                      {row.averageRating}
-                                    </Typography>
-                                  </Box>
-                                  {isLowSatisfaction && (
-                                    <Chip
-                                      label={t('satisfaction.flag')}
-                                      size="small"
-                                      sx={{
-                                        fontWeight: 700,
-                                        bgcolor: 'rgba(239, 68, 68, 0.08)',
-                                        color: '#ef4444',
-                                        border: '1px solid rgba(239, 68, 68, 0.15)',
-                                        fontSize: 11,
-                                      }}
-                                    />
-                                  )}
-                                </Box>
-                              </TableCell>
-                              <TableCell
-                                sx={{
-                                  color: row.negativeReviews > 0 ? '#ef4444' : '#64748b',
-                                  fontWeight: 700,
-                                }}
+                        satisfactionData
+                          .slice(
+                            satisfactionPage * satisfactionRowsPerPage,
+                            satisfactionPage * satisfactionRowsPerPage + satisfactionRowsPerPage,
+                          )
+                          .map((row, index) => {
+                            const isLowSatisfaction = row.averageRating < 3.5;
+                            return (
+                              <TableRow
+                                key={row.id}
+                                hover
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                               >
-                                {row.negativeReviews}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
+                                <TableCell
+                                  align="center"
+                                  sx={{ color: '#64748b', fontWeight: 500 }}
+                                >
+                                  {satisfactionPage * satisfactionRowsPerPage + index + 1}
+                                </TableCell>
+                                <TableCell sx={{ color: '#1e293b', fontWeight: 600 }}>
+                                  {row.doctorName}
+                                </TableCell>
+                                <TableCell sx={{ color: '#475569', fontWeight: 500 }}>
+                                  {row.specialtyName}
+                                </TableCell>
+                                <TableCell sx={{ color: '#475569', fontWeight: 600 }}>
+                                  {row.totalReviews}
+                                </TableCell>
+                                <TableCell>
+                                  <Box display="flex" alignItems="center" gap={1}>
+                                    <Box
+                                      display="flex"
+                                      alignItems="center"
+                                      sx={{ color: '#f59e0b' }}
+                                    >
+                                      <StarIcon fontSize="small" />
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ ml: 0.5, fontWeight: 800, color: '#1e293b' }}
+                                      >
+                                        {row.averageRating}
+                                      </Typography>
+                                    </Box>
+                                    {isLowSatisfaction && (
+                                      <Chip
+                                        label={t('satisfaction.flag')}
+                                        size="small"
+                                        sx={{
+                                          fontWeight: 700,
+                                          bgcolor: 'rgba(239, 68, 68, 0.08)',
+                                          color: '#ef4444',
+                                          border: '1px solid rgba(239, 68, 68, 0.15)',
+                                          fontSize: 11,
+                                        }}
+                                      />
+                                    )}
+                                  </Box>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    color: row.negativeReviews > 0 ? '#ef4444' : '#64748b',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {row.negativeReviews}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
                       )}
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={satisfactionData.length}
+                  page={satisfactionPage}
+                  onPageChange={handleChangeSatisfactionPage}
+                  rowsPerPage={satisfactionRowsPerPage}
+                  onRowsPerPageChange={handleChangeSatisfactionRowsPerPage}
+                  labelRowsPerPage={t('pagination.rowsPerPage') || 'Số hàng mỗi trang:'}
+                />
               </Box>
             )}
           </Box>

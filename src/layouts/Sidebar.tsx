@@ -89,7 +89,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const drawerContent = (
     <>
       {/* 1. Khu vực Logo */}
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box
+        sx={{
+          p: 2.25,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
         <img src="./assets/logo.png" alt="BookingHealth Logo" width={40} />
         <GradientText variant="h6" sx={{ letterSpacing: 0.5 }}>
           BookingHealth

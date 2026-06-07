@@ -9,6 +9,8 @@ import type {
 import { clinicService } from '../../services/clinicService';
 import { doctorService } from '../../services/doctorService';
 import { appointmentSlotService } from '../../services/appointmentSlotService';
+import { dayOffService } from '../../services/dayOffService';
+import type { DayOffItem } from '../../services/dayOffService';
 import { toast } from 'sonner';
 
 interface AxiosErrorLike {
@@ -19,49 +21,31 @@ interface AxiosErrorLike {
   };
 }
 
-// Mock Data for Leave Requests
-const MOCK_LEAVE_REQUESTS: LeaveRequest[] = [
-  {
-    id: 'LR001',
-    doctorId: 1,
-    doctorName: 'BS. Nguyễn Văn An',
-    clinicName: 'Phòng khám Nha khoa Quốc tế',
-    startDate: '2026-05-20',
-    endDate: '2026-05-22',
-    reason: 'Tham gia hội nghị khoa học thường niên ngành Nha khoa răng hàm mặt tại TP.HCM',
-    status: 'PENDING',
-  },
-  {
-    id: 'LR002',
-    doctorId: 2,
-    doctorName: 'BS. Trần Thị Bình',
-    clinicName: 'Phòng khám Tim mạch Tâm Đức',
-    startDate: '2026-05-25',
-    endDate: '2026-05-25',
-    reason: 'Giải quyết công việc gia đình đột xuất',
-    status: 'APPROVED',
-  },
-  {
-    id: 'LR003',
-    doctorId: 3,
-    doctorName: 'BS. Lê Hoàng',
-    clinicName: 'Phòng khám đa khoa Hoàn Mỹ',
-    startDate: '2026-05-28',
-    endDate: '2026-05-30',
-    reason: 'Nghỉ phép thường niên đi du lịch cùng gia đình',
-    status: 'REJECTED',
-  },
-  {
-    id: 'LR004',
-    doctorId: 1,
-    doctorName: 'BS. Nguyễn Văn An',
-    clinicName: 'Phòng khám Nha khoa Quốc tế',
-    startDate: '2026-06-01',
-    endDate: '2026-06-05',
-    reason: 'Nghỉ ốm điều trị tại bệnh viện',
-    status: 'PENDING',
-  },
-];
+// Helper: map backend status (0,1,2) to frontend status string
+const mapStatus = (status: number): 'PENDING' | 'APPROVED' | 'REJECTED' => {
+  switch (status) {
+    case 1:
+      return 'APPROVED';
+    case 2:
+      return 'REJECTED';
+    default:
+      return 'PENDING';
+  }
+};
+
+// Helper: map backend status filter string to number
+const mapStatusFilterToNumber = (filter: string): number | null => {
+  switch (filter) {
+    case 'PENDING':
+      return 0;
+    case 'APPROVED':
+      return 1;
+    case 'REJECTED':
+      return 2;
+    default:
+      return null; // ALL
+  }
+};
 
 export const useManageScheduleHooks = () => {
   type ClinicModel = {
@@ -81,7 +65,9 @@ export const useManageScheduleHooks = () => {
   const [tabIndex, setTabIndex] = useState(0);
 
   // Core Data States
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [leaveTotalElements, setLeaveTotalElements] = useState(0);
+  const [leaveLoading, setLeaveLoading] = useState(false);
   const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>([]);
   const [scheduleTotalElements, setScheduleTotalElements] = useState(0);
   const [scheduleLoading, setScheduleLoading] = useState(false);
@@ -121,13 +107,6 @@ export const useManageScheduleHooks = () => {
               name: c.name || c.clinicName || '',
             })),
           );
-        } else {
-          // fallback
-          setClinics([
-            { id: 1, name: 'Phòng khám Nha khoa Quốc tế' },
-            { id: 2, name: 'Phòng khám Tim mạch Tâm Đức' },
-            { id: 3, name: 'Phòng khám đa khoa Hoàn Mỹ' },
-          ]);
         }
 
         // Load doctors
@@ -139,31 +118,92 @@ export const useManageScheduleHooks = () => {
               name: d.fullName || d.doctorName || '',
             })),
           );
-        } else {
-          // fallback
-          setDoctors([
-            { id: 1, name: 'BS. Nguyễn Văn An' },
-            { id: 2, name: 'BS. Trần Thị Bình' },
-            { id: 3, name: 'BS. Lê Hoàng' },
-          ]);
         }
       } catch (error) {
-        console.error('Error fetching dropdown filters data, falling back to mock.', error);
-        setClinics([
-          { id: 1, name: 'Phòng khám Nha khoa Quốc tế' },
-          { id: 2, name: 'Phòng khám Tim mạch Tâm Đức' },
-          { id: 3, name: 'Phòng khám đa khoa Hoàn Mỹ' },
-        ]);
-        setDoctors([
-          { id: 1, name: 'BS. Nguyễn Văn An' },
-          { id: 2, name: 'BS. Trần Thị Bình' },
-          { id: 3, name: 'BS. Lê Hoàng' },
-        ]);
+        console.error('Error fetching dropdown filters data.', error);
       }
     };
     fetchDropdownData();
   }, []);
 
+  // --- TAB 1: Fetch leave requests from API ---
+  const fetchLeaveRequests = useCallback(async () => {
+    setLeaveLoading(true);
+    try {
+      const statusNum = mapStatusFilterToNumber(leaveStatusFilter);
+      const res = await dayOffService.getAll(statusNum, leavePage, leaveRowsPerPage);
+      if (res?.result) {
+        const content = res.result.content || [];
+        const mapped: LeaveRequest[] = content.map((item: DayOffItem) => ({
+          id: item.id,
+          doctorId: item.doctorId,
+          doctorName: item.doctorName || '',
+          clinicName: item.clinicName || '',
+          startDate: item.startDate || '',
+          endDate: item.endDate || '',
+          reason: item.reason || '',
+          status: mapStatus(item.status),
+        }));
+        setLeaveRequests(mapped);
+        setLeaveTotalElements(res.result.totalElements || 0);
+      } else {
+        setLeaveRequests([]);
+        setLeaveTotalElements(0);
+      }
+    } catch (error) {
+      console.error('Error fetching leave requests:', error);
+      setLeaveRequests([]);
+      setLeaveTotalElements(0);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }, [leaveStatusFilter, leavePage, leaveRowsPerPage]);
+
+  useEffect(() => {
+    if (tabIndex === 0) {
+      Promise.resolve().then(() => fetchLeaveRequests());
+    }
+  }, [tabIndex, fetchLeaveRequests]);
+
+  // Reset page when filter changes
+  useEffect(() => {
+    Promise.resolve().then(() => setLeavePage(0));
+  }, [leaveStatusFilter]);
+
+  const handleApproveLeave = async (id: number) => {
+    try {
+      await dayOffService.approve(id);
+      const req = leaveRequests.find((r) => r.id === id);
+      toast.success(t('leaveApproval.messages.approveSuccess', { name: req?.doctorName || '' }));
+      fetchLeaveRequests();
+    } catch (error) {
+      console.error('Error approving leave:', error);
+      toast.error('Không thể duyệt đơn nghỉ phép');
+    }
+  };
+
+  const handleRejectLeave = async (id: number) => {
+    try {
+      await dayOffService.reject(id);
+      const req = leaveRequests.find((r) => r.id === id);
+      toast.error(t('leaveApproval.messages.rejectSuccess', { name: req?.doctorName || '' }));
+      fetchLeaveRequests();
+    } catch (error) {
+      console.error('Error rejecting leave:', error);
+      toast.error('Không thể từ chối đơn nghỉ phép');
+    }
+  };
+
+  const handleChangeLeavePage = (_event: unknown, newPage: number) => {
+    setLeavePage(newPage);
+  };
+
+  const handleChangeLeaveRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+    setLeaveRowsPerPage(parseInt(event.target.value, 10));
+    setLeavePage(0);
+  };
+
+  // --- TAB 2: Fetch time slots ---
   const fetchTimeSlots = useCallback(async () => {
     try {
       const res = await appointmentSlotService.getAll(0, 1000);
@@ -207,59 +247,6 @@ export const useManageScheduleHooks = () => {
       fetchTimeSlots();
     });
   }, [fetchTimeSlots]);
-
-  // --- ACTIONS FOR TAB 1: Duyệt nghỉ phép ---
-  const handleApproveLeave = (id: string) => {
-    const req = leaveRequests.find((r) => r.id === id);
-    if (!req) return;
-
-    setLeaveRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'APPROVED' } : r)));
-
-    // Also: system automatically closes matching doctor schedule dates!
-    // We can simulate this by filtering out their active slots or updating
-    // workSchedules in mock data.
-    setWorkSchedules((prev) =>
-      prev.filter(
-        (ws) =>
-          !(ws.doctorId === req.doctorId && ws.date >= req.startDate && ws.date <= req.endDate),
-      ),
-    );
-
-    toast.success(t('leaveApproval.messages.approveSuccess', { name: req.doctorName }));
-  };
-
-  const handleRejectLeave = (id: string) => {
-    const req = leaveRequests.find((r) => r.id === id);
-    if (!req) return;
-
-    setLeaveRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'REJECTED' } : r)));
-    toast.error(t('leaveApproval.messages.rejectSuccess', { name: req.doctorName }));
-  };
-
-  // Filtered leave requests
-  const filteredLeaveRequests = useMemo(() => {
-    return leaveRequests.filter((req) => {
-      if (leaveStatusFilter === 'ALL') return true;
-      return req.status === leaveStatusFilter;
-    });
-  }, [leaveRequests, leaveStatusFilter]);
-
-  // Paginated leave requests
-  const paginatedLeaveRequests = useMemo(() => {
-    return filteredLeaveRequests.slice(
-      leavePage * leaveRowsPerPage,
-      leavePage * leaveRowsPerPage + leaveRowsPerPage,
-    );
-  }, [filteredLeaveRequests, leavePage, leaveRowsPerPage]);
-
-  const handleChangeLeavePage = (_event: unknown, newPage: number) => {
-    setLeavePage(newPage);
-  };
-
-  const handleChangeLeaveRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
-    setLeaveRowsPerPage(parseInt(event.target.value, 10));
-    setLeavePage(0);
-  };
 
   // --- ACTIONS FOR TAB 2: Theo dõi lịch trực toàn sàn ---
   const fetchWorkSchedules = useCallback(async () => {
@@ -390,8 +377,9 @@ export const useManageScheduleHooks = () => {
     doctors,
 
     // Leave approvals tab
-    leaveRequests: paginatedLeaveRequests,
-    leaveTotalElements: filteredLeaveRequests.length,
+    leaveRequests,
+    leaveTotalElements,
+    leaveLoading,
     leavePage,
     leaveRowsPerPage,
     leaveStatusFilter,

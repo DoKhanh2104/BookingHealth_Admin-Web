@@ -75,6 +75,7 @@ export default function ManageSchedule() {
     // Tab 1: Leave approvals
     leaveRequests,
     leaveTotalElements,
+    leaveLoading,
     leavePage,
     leaveRowsPerPage,
     leaveStatusFilter,
@@ -230,6 +231,7 @@ export default function ManageSchedule() {
               </Box>
 
               {/* Leave Requests Table */}
+              {leaveLoading && <LinearProgress sx={{ mb: 2 }} />}
               <TableContainer
                 component={Paper}
                 sx={{
